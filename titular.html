@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Formulario Titular</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/custom.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">
+        <img src="img/RLP_LOGO.png" alt="RLP" class="logo-navbar">
+        <img src="img/ML_LOGO.png" alt="ML" class="logo-navbar">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Menú Principal</a></li>
+          <li class="nav-item"><a class="nav-link active" href="titular.html">👤 Titular</a></li>
+          <li class="nav-item"><a class="nav-link" href="beneficiario.html">🤝 Beneficiario</a></li>
+          <li class="nav-item"><a class="nav-link" href="inmueble.html">🏠 Inmueble</a></li>
+          <li class="nav-item"><a class="nav-link" href="compraventa.html">💰 Compraventa</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+  <div class="container mt-5 pt-5">
+    <div class="card shadow-lg p-4 rounded-4">
+      <h2 class="text-center mb-4">Formulario de Registro - Titular</h2>
+      <form id="registroForm">
+        <!-- Datos personales -->
+        <div class="mb-3"><label class="form-label">Nombre Completo</label><input type="text" class="form-control"
+            id="nombre" required></div>
+        <div class="mb-3"><label class="form-label">Dirección</label><input type="text" class="form-control"
+            id="direccion" required></div>
+        <div class="mb-3"><label class="form-label">Teléfono</label><input type="text" class="form-control"
+            id="telefono" required></div>
+        <div class="mb-3"><label class="form-label">DPI/CUI</label><input type="text" class="form-control" id="dpi"
+            required></div>
+        <div class="mb-3"><label class="form-label">NIT</label><input type="text" class="form-control" id="nit"
+            required></div>
+        <div class="mb-3"><label class="form-label">Fecha de Nacimiento</label><input type="date" class="form-control"
+            id="fecha_nacimiento" required></div>
+        <div class="mb-3"><label class="form-label">Edad</label><input type="text" class="form-control" id="edad"
+            readonly></div>
+        <div class="mb-3"><label class="form-label">Estado Civil</label><input type="text" class="form-control"
+            id="estado_civil"></div>
+        <div class="mb-3"><label class="form-label">Nacionalidad</label><input type="text" class="form-control"
+            id="nacionalidad"></div>
+
+        <!-- Datos laborales -->
+        <div class="mb-3"><label class="form-label">Profesión/Actividad</label><input type="text" class="form-control"
+            id="profesion"></div>
+        <div class="mb-3"><label class="form-label">Empresa de Trabajo</label><input type="text" class="form-control"
+            id="empresa"></div>
+        <div class="mb-3"><label class="form-label">Dirección de Trabajo</label><input type="text" class="form-control"
+            id="direccion_trabajo"></div>
+        <div class="mb-3"><label class="form-label">Teléfonos</label><input type="text" class="form-control"
+            id="telefonos_trabajo"></div>
+        <div class="mb-3"><label class="form-label">Puesto de Trabajo</label><input type="text" class="form-control"
+            id="puesto"></div>
+        <div class="mb-3"><label class="form-label">Tiempo de Trabajo</label><input type="text" class="form-control"
+            id="tiempo_trabajo"></div>
+        <div class="mb-3"><label class="form-label">Salario Mensual</label><input type="text" class="form-control"
+            id="salario"></div>
+        <div class="mb-3"><label class="form-label">Otros Ingresos</label><input type="text" class="form-control"
+            id="otros_ingresos"></div>
+
+        <div class="d-grid mt-3"><button type="submit" class="btn btn-primary btn-lg">Enviar</button></div>
+      </form>
+    </div>
+
+    <div id="resultado" class="card shadow-lg p-4 rounded-4 mt-4 d-none">
+      <h2 class="text-center mb-4">Datos Recibidos</h2>
+      <ul class="list-group">
+        <li class="list-group-item"><strong>Nombre:</strong> <span id="r-nombre"></span></li>
+        <li class="list-group-item"><strong>Dirección:</strong> <span id="r-direccion"></span></li>
+        <li class="list-group-item"><strong>Teléfono:</strong> <span id="r-telefono"></span></li>
+        <li class="list-group-item"><strong>DPI/CUI:</strong> <span id="r-dpi"></span></li>
+        <li class="list-group-item"><strong>NIT:</strong> <span id="r-nit"></span></li>
+        <li class="list-group-item"><strong>Fecha de Nacimiento:</strong> <span id="r-fecha_nacimiento"></span></li>
+        <li class="list-group-item"><strong>Edad:</strong> <span id="r-edad"></span></li>
+        <li class="list-group-item"><strong>Estado Civil:</strong> <span id="r-estado_civil"></span></li>
+        <li class="list-group-item"><strong>Nacionalidad:</strong> <span id="r-nacionalidad"></span></li>
+        <li class="list-group-item"><strong>Profesión:</strong> <span id="r-profesion"></span></li>
+        <li class="list-group-item"><strong>Empresa:</strong> <span id="r-empresa"></span></li>
+        <li class="list-group-item"><strong>Dirección de Trabajo:</strong> <span id="r-direccion_trabajo"></span></li>
+        <li class="list-group-item"><strong>Teléfonos Trabajo:</strong> <span id="r-telefonos_trabajo"></span></li>
+        <li class="list-group-item"><strong>Puesto:</strong> <span id="r-puesto"></span></li>
+        <li class="list-group-item"><strong>Tiempo de Trabajo:</strong> <span id="r-tiempo_trabajo"></span></li>
+        <li class="list-group-item"><strong>Salario:</strong> <span id="r-salario"></span></li>
+        <li class="list-group-item"><strong>Otros Ingresos:</strong> <span id="r-otros_ingresos"></span></li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Cargar datos al iniciar
+    const form = document.getElementById("registroForm");
+    const datosGuardados = cargarDatos('titular');
+    if (datosGuardados) {
+      rellenarFormulario(form, datosGuardados);
+      // Calcular edad si hay fecha
+      if (datosGuardados.fecha_nacimiento) {
+        const evento = new Event('change');
+        document.getElementById("fecha_nacimiento").dispatchEvent(evento);
+      }
+    }
+
+    document.getElementById("fecha_nacimiento").addEventListener("change", function () {
+      let fecha = new Date(this.value + 'T00:00:00'); // Asegurar interpretación correcta de fecha local
+      let hoy = new Date();
+      let edad = hoy.getFullYear() - fecha.getFullYear();
+      let m = hoy.getMonth() - fecha.getMonth();
+      if (m < 0 || (m === 0 && hoy.getDate() < fecha.getDate())) edad--;
+      document.getElementById("edad").value = edad;
+    });
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Recolectar datos
+      const formData = {};
+      const inputs = form.querySelectorAll("input");
+      inputs.forEach(input => {
+        if (input.id) formData[input.id] = input.value;
+      });
+
+      // Guardar en localStorage
+      guardarDatos('titular', formData);
+
+      // Mostrar confirmación visual (opcional, o redirigir)
+      const campos = ["nombre", "direccion", "telefono", "dpi", "nit", "fecha_nacimiento", "edad", "estado_civil", "nacionalidad", "profesion", "empresa", "direccion_trabajo", "telefonos_trabajo", "puesto", "tiempo_trabajo", "salario", "otros_ingresos"];
+      campos.forEach(c => {
+        const span = document.getElementById("r-" + c);
+        if (span && formData[c]) span.textContent = formData[c];
+      });
+
+      document.getElementById("resultado").classList.remove("d-none");
+
+      // Opcional: Feedback al usuario
+      alert("Datos del titular guardados correctamente. Puede continuar con las siguientes secciones.");
+    });
+  </script>

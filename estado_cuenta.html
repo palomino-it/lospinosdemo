@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Estado de Cuenta</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .card {
+                border: none !important;
+                box-shadow: none !important;
+            }
+
+            .print-header {
+                display: block !important;
+            }
+        }
+
+        .print-header {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top no-print">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <img src="img/RLP_LOGO.png" alt="RLP" class="logo-navbar">
+                <img src="img/ML_LOGO.png" alt="ML" class="logo-navbar">
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">🏠 Menú Principal</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+
+        <!-- Buscador -->
+        <div class="card p-4 shadow-sm mb-4 no-print">
+            <h4>🔍 Buscar Cliente</h4>
+            <div class="row g-2">
+                <div class="col-md-9">
+                    <input type="text" id="busqueda" class="form-control" placeholder="Nombre o DPI...">
+                </div>
+                <div class="col-md-3 d-grid">
+                    <button class="btn btn-primary" id="btn-buscar">Buscar</button>
+                </div>
+            </div>
+            <div id="resultados-busqueda" class="list-group mt-3"></div>
+        </div>
+
+        <!-- Estado de Cuenta (Oculto hasta seleccionar) -->
+        <div id="estado-cuenta-container" class="d-none">
+
+            <div class="card p-4 shadow-lg mb-4">
+                <!-- Encabezado Impresión -->
+                <!-- Encabezado Impresión (Solo visible al imprimir) -->
+                <div class="print-header text-center mb-4">
+                    <div class="print-logos">
+                        <img src="img/RLP_LOGO.png" alt="RLP" class="print-logo">
+                        <div class="text-center flex-grow-1">
+                            <h3>RESIDENCIALES "LOS PINOS"</h3>
+                            <h4>Estado de Cuenta Consolidado</h4>
+                        </div>
+                        <img src="img/ML_LOGO.png" alt="ML" class="print-logo">
+                    </div>
+                    <p class="text-end small">Fecha de Emisión: <span id="fecha-impresion"></span></p>
+                </div>
+
+                <!-- Datos del Cliente (Diseño Ejecutivo) -->
+                <div class="row mb-4 p-3 mx-0 border print-section">
+                    <div class="col-12 mb-2 border-bottom pb-2">
+                        <h6 class="print-label text-uppercase mb-2"
+                            style="font-size: 11pt; border-bottom: 2px solid #ddd; padding-bottom: 5px;">1. Datos del
+                            Titular y Propiedad</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <div class="mb-1"><span class="print-label">NOMBRE:</span> <span id="ec-nombre"
+                                        class="print-value text-uppercase fw-bold"></span></div>
+                                <div class="mb-1"><span class="print-label">DPI:</span> <span id="ec-dpi"
+                                        class="print-value"></span></div>
+                                <div class="mb-1"><span class="print-label">NIT:</span> <span id="ec-nit"
+                                        class="print-value"></span></div>
+                                <div class="mb-1"><span class="print-label">EDAD:</span> <span id="ec-edad"
+                                        class="print-value"></span> años</div>
+                                <div class="mb-1"><span class="print-label">ESTADO CIVIL:</span> <span id="ec-civil"
+                                        class="print-value text-uppercase"></span></div>
+                                <div class="mb-1"><span class="print-label">NACIONALIDAD:</span> <span
+                                        id="ec-nacionalidad" class="print-value text-uppercase"></span></div>
+                                <div class="mb-1"><span class="print-label">DIRECCIÓN:</span> <span id="ec-direccion"
+                                        class="print-value text-uppercase" style="font-size: 10pt;"></span></div>
+                                <div class="mb-1"><span class="print-label">TELÉFONO:</span> <span id="ec-telefono"
+                                        class="print-value"></span></div>
+                            </div>
+                            <div class="col-6 text-end">
+                                <div class="mb-1"><span class="print-label">LOTE:</span> <span id="ec-lote"
+                                        class="print-value fw-bold"></span></div>
+                                <div class="mb-1"><span class="print-label">MANZANA:</span> <span id="ec-manzana"
+                                        class="print-value"></span></div>
+                                <div class="mb-1"><span class="print-label">ÁREA:</span> <span id="ec-area"
+                                        class="print-value"></span> m²</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 pt-2">
+                        <h6 class="print-label text-uppercase mb-2"
+                            style="font-size: 11pt; border-bottom: 2px solid #ddd; padding-bottom: 5px;">2. Datos del
+                            Beneficiario</h6>
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="row">
+                                    <div class="col-6">
+                                        <div class="mb-1"><span class="print-label">NOMBRE:</span> <span
+                                                id="ec-beneficiario-nombre" class="print-value text-uppercase"></span>
+                                        </div>
+                                        <div class="mb-1"><span class="print-label">DPI:</span> <span
+                                                id="ec-beneficiario-dpi" class="print-value"></span></div>
+                                    </div>
+                                    <div class="col-6 text-end">
+                                        <div class="mb-1"><span class="print-label">TELÉFONO:</span> <span
+                                                id="ec-beneficiario-telefono" class="print-value"></span></div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="mb-1"><span class="print-label">DIRECCIÓN:</span> <span
+                                                id="ec-beneficiario-direccion" class="print-value text-uppercase"
+                                                style="font-size: 10pt;"></span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen Financiero -->
+                <h6 class="print-label text-uppercase mb-2 d-none d-print-block"
+                    style="font-size: 11pt; border-bottom: 2px solid #ddd; padding-bottom: 5px;">3. Datos de la Venta
+                </h6>
+                <div class="row text-center mb-4">
+                    <div class="col-4">
+                        <div class="card p-2 print-summary-box">
+                            <h6 class="text-uppercase small">Total Venta</h6>
+                            <h4 id="ec-total">Q0.00</h4>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card p-2 print-summary-box">
+                            <h6 class="text-uppercase small">Total Pagado</h6>
+                            <h4 id="ec-pagado">Q0.00</h4>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="card p-2 print-summary-box">
+                            <h6 class="text-uppercase small">Saldo Pendiente</h6>
+                            <h4 id="ec-saldo">Q0.00</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tablas de Pagos -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2">📅 Plan de Pagos Pactado</h5>
+                        <table class="table table-striped table-sm">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Fecha</th>
+                                    <th>Monto</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-pagos-pactados"></tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="border-bottom pb-2">💵 Historial de Abonos</h5>
+                        <table class="table table-hover table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Recibo</th>
+                                    <th>Monto</th>
+                                    <th class="no-print"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-abonos"></tbody>
+                        </table>
+                        <div class="d-grid mt-3 no-print">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAbono">➕
+                                Registrar Nuevo Abono</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-5 no-print">
+                    <button class="btn btn-primary btn-lg" onclick="window.print()">🖨️ Imprimir Estado de
+                        Cuenta</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Registrar Abono -->
+    <div class="modal fade" id="modalAbono" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Registrar Nuevo Abono</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="form-abono">
+                        <input type="hidden" id="abono-index" value="-1">
+                        <div class="mb-3">
+                            <label>Fecha de Pago</label>
+                            <input type="date" id="abono-fecha" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>Monto (Q)</label>
+                            <input type="number" id="abono-monto" class="form-control" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label>No. Recibo / Referencia</label>
+                            <input type="text" id="abono-recibo" class="form-control" placeholder="Ej: REC-001"
+                                required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Guardar Abono</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        let clienteActual = null;
+
+        // Buscar Cliente
+        document.getElementById('btn-buscar').addEventListener('click', () => {
+            const termino = document.getElementById('busqueda').value.toLowerCase();
+            const lista = document.getElementById('resultados-busqueda');
+            lista.innerHTML = '';
+
+            const clientes = obtenerClientesDB();
+            const encontrados = clientes.filter(c =>
+                (c.titular.nombre && c.titular.nombre.toLowerCase().includes(termino)) ||
+                (c.titular.dpi && c.titular.dpi.includes(termino))
+            );
+
+            if (encontrados.length === 0) {
+                lista.innerHTML = `
+                    <div class="alert alert-warning">
+                        No se encontraron clientes con ese criterio.
+                        <hr>
+                        <p class="mb-0">¿Es la primera vez que usas este módulo? Probablemente la base de datos esté vacía.</p>
+                        <button class="btn btn-sm btn-outline-dark mt-2" onclick="generarDemo()">🎲 Generar Cliente de Prueba</button>
+                    </div>`;
+                return;
+            }
+
+            encontrados.forEach(c => {
+                const item = document.createElement('a');
+                item.className = 'list-group-item list-group-item-action';
+                item.innerHTML = `<strong>${c.titular.nombre}</strong> - DPI: ${c.titular.dpi} - Lote: ${c.inmueble.lotes}`;
+                item.href = '#';
+                item.onclick = (e) => {
+                    e.preventDefault();
+                    cargarCliente(c.id);
+                };
+                lista.appendChild(item);
+            });
+        });
+
+        // Función para generar datos de prueba si la BD está vacía
+        function generarDemo() {
+            const demo = {
+                titular: { nombre: "Juan Perez Demo", dpi: "1234567890101", telefono: "5555-5555" },
+                beneficiario: { nombre: "Maria Perez", dpi: "0000000000000" },
+                inmueble: { lotes: "Lote 5, Manzana B", manzana: "B", area: "200" },
+                compraventa: {
+                    total: "150000",
+                    pago: "10000",
+                    otros_descuentos: "0",
+                    pagos: [
+                        { fecha: "2024-02-01", cantidad: "2000" },
+                        { fecha: "2024-03-01", cantidad: "2000" },
+                        { fecha: "2024-04-01", cantidad: "2000" }
+                    ]
+                }
+            };
+            guardarClienteDB(demo);
+            alert("Cliente de prueba generado. Vuelve a buscar 'Juan'.");
+            document.getElementById('busqueda').value = "Juan";
+
+            // Simular clic para refrescar resultados
+            setTimeout(() => document.getElementById('btn-buscar').click(), 500);
+        }
+
+        // Cargar Cliente en la vista
+        function cargarCliente(id) {
+            clienteActual = obtenerClientePorId(id);
+            if (!clienteActual) return;
+
+            // Ocultar buscador y mostrar estado de cuenta
+            document.getElementById('resultados-busqueda').innerHTML = '';
+            document.getElementById('estado-cuenta-container').classList.remove('d-none');
+            document.getElementById('fecha-impresion').textContent = new Date().toLocaleDateString();
+
+            // Datos Generales
+            document.getElementById('ec-nombre').textContent = clienteActual.titular.nombre;
+            document.getElementById('ec-dpi').textContent = clienteActual.titular.dpi;
+            document.getElementById('ec-telefono').textContent = clienteActual.titular.telefono;
+            // Nuevos Campos Titular
+            document.getElementById('ec-nit').textContent = clienteActual.titular.nit || 'C/F';
+            document.getElementById('ec-edad').textContent = clienteActual.titular.edad || '';
+            document.getElementById('ec-civil').textContent = clienteActual.titular.estado_civil || '';
+            document.getElementById('ec-nacionalidad').textContent = clienteActual.titular.nacionalidad || '';
+            document.getElementById('ec-direccion').textContent = clienteActual.titular.direccion || '';
+
+            document.getElementById('ec-lote').textContent = clienteActual.inmueble.lotes;
+            document.getElementById('ec-manzana').textContent = clienteActual.inmueble.manzana;
+            document.getElementById('ec-area').textContent = clienteActual.inmueble.area;
+
+            // Datos Beneficiario
+            if (clienteActual.beneficiario) {
+                document.getElementById('ec-beneficiario-nombre').textContent = clienteActual.beneficiario.b_nombre || clienteActual.beneficiario.nombre || 'No registrado';
+                document.getElementById('ec-beneficiario-dpi').textContent = clienteActual.beneficiario.b_dpi || clienteActual.beneficiario.dpi || 'N/A';
+                document.getElementById('ec-beneficiario-telefono').textContent = clienteActual.beneficiario.b_telefonos || '';
+                document.getElementById('ec-beneficiario-direccion').textContent = clienteActual.beneficiario.b_direccion || '';
+            } else {
+                document.getElementById('ec-beneficiario-nombre').textContent = 'No registrado';
+                document.getElementById('ec-beneficiario-dpi').textContent = '';
+                document.getElementById('ec-beneficiario-telefono').textContent = '';
+                document.getElementById('ec-beneficiario-direccion').textContent = '';
+            }
+
+            // Cálculos Financieros
+            const totalVenta = Number(clienteActual.compraventa.total) || 0;
+            const pagoInicial = Number(clienteActual.compraventa.pago) || 0;
+            const otrosDescuentos = Number(clienteActual.compraventa.otros_descuentos) || 0;
+
+            let totalAbonado = pagoInicial + otrosDescuentos; // Empezamos con el enganche y descuentos
+
+            // Sumar abonos extra
+            if (clienteActual.abonos) {
+                clienteActual.abonos.forEach(a => totalAbonado += Number(a.monto));
+            }
+
+            const saldoPendiente = totalVenta - totalAbonado;
+
+            document.getElementById('ec-total').textContent = `Q${totalVenta.toFixed(2)}`;
+            document.getElementById('ec-pagado').textContent = `Q${totalAbonado.toFixed(2)}`;
+            document.getElementById('ec-saldo').textContent = `Q${saldoPendiente.toFixed(2)}`;
+
+            // Tabla Pactados (Compraventa original)
+            const tablaPactados = document.getElementById('tabla-pagos-pactados');
+            tablaPactados.innerHTML = `<tr><td>1</td><td>(Enganche)</td><td>Q${pagoInicial.toFixed(2)}</td></tr>`;
+            if (clienteActual.compraventa.pagos) {
+                clienteActual.compraventa.pagos.forEach((p, i) => {
+                    tablaPactados.innerHTML += `<tr><td>${i + 2}</td><td>${p.fecha}</td><td>Q${Number(p.cantidad).toFixed(2)}</td></tr>`;
+                });
+            }
+
+            // Tabla Abonos Reales
+            renderTablaAbonos();
+        }
+
+
+
+        function renderTablaAbonos() {
+            const tablaAbonos = document.getElementById('tabla-abonos');
+            tablaAbonos.innerHTML = '';
+
+            // Agregar enganche como primer abono "virtual" para historial (No editable aquí)
+            const enganche = Number(clienteActual.compraventa.pago) || 0;
+            if (enganche > 0) {
+                tablaAbonos.innerHTML += `<tr class="table-info"><td>(Inicio)</td><td>ENGANCHE</td><td>Q${enganche.toFixed(2)}</td><td class="no-print"></td></tr>`;
+            }
+
+            if (clienteActual.abonos) {
+                clienteActual.abonos.forEach((a, index) => {
+                    tablaAbonos.innerHTML += `
+                        <tr>
+                            <td>${a.fecha}</td>
+                            <td>${a.recibo}</td>
+                            <td>Q${Number(a.monto).toFixed(2)}</td>
+                            <td class="no-print text-end">
+                                <button class="btn btn-sm btn-outline-primary" onclick="editarAbono(${index})">✏️</button>
+                            </td>
+                        </tr>`;
+                });
+            }
+        }
+
+        // Preparar modal para edición
+        function editarAbono(index) {
+            const abono = clienteActual.abonos[index];
+            document.getElementById('abono-index').value = index;
+            document.getElementById('abono-fecha').value = abono.fecha;
+            document.getElementById('abono-monto').value = abono.monto;
+            document.getElementById('abono-recibo').value = abono.recibo;
+
+            document.querySelector('#modalAbono .modal-title').textContent = 'Editar Abono';
+            const modal = new bootstrap.Modal(document.getElementById('modalAbono'));
+            modal.show();
+        }
+
+        // Limpiar modal al cerrar
+        document.getElementById('modalAbono').addEventListener('hidden.bs.modal', () => {
+            document.getElementById('form-abono').reset();
+            document.getElementById('abono-index').value = "-1";
+            document.querySelector('#modalAbono .modal-title').textContent = 'Registrar Nuevo Abono';
+        });
+
+        // Registrar o Actualizar Abono
+        document.getElementById('form-abono').addEventListener('submit', (e) => {
+            e.preventDefault();
+            if (!clienteActual) return;
+
+            const indexStr = document.getElementById('abono-index').value;
+            const index = parseInt(indexStr);
+
+            const nuevoAbono = {
+                fecha: document.getElementById('abono-fecha').value,
+                monto: document.getElementById('abono-monto').value,
+                recibo: document.getElementById('abono-recibo').value
+            };
+
+            if (index >= 0) {
+                // Modo Edición
+                actualizarAbonoDB(clienteActual.id, index, nuevoAbono);
+                alert("Abono actualizado correctamente.");
+            } else {
+                // Modo Creación
+                registrarAbonoDB(clienteActual.id, nuevoAbono);
+                alert("Abono registrado correctamente.");
+            }
+
+            // Recargar datos en memoria y vista
+            clienteActual = obtenerClientePorId(clienteActual.id);
+            cargarCliente(clienteActual.id); // Recalcular todo
+
+            // Cerrar modal
+            const modalEl = document.getElementById('modalAbono');
+            const modal = bootstrap.Modal.getInstance(modalEl);
+            modal.hide();
+        });
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Condiciones de Compraventa</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/custom.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="index.html">
+        <img src="img/RLP_LOGO.png" alt="RLP" class="logo-navbar">
+        <img src="img/ML_LOGO.png" alt="ML" class="logo-navbar">
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Menú Principal</a></li>
+          <li class="nav-item"><a class="nav-link" href="titular.html">👤 Titular</a></li>
+          <li class="nav-item"><a class="nav-link" href="beneficiario.html">🤝 Beneficiario</a></li>
+          <li class="nav-item"><a class="nav-link" href="inmueble.html">🏠 Inmueble</a></li>
+          <li class="nav-item"><a class="nav-link active" href="compraventa.html">💰 Compraventa</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+  <div class="container mt-5 pt-5">
+    <div class="card shadow-lg p-4 rounded-4">
+      <h2 class="text-center mb-4">Condiciones de Compraventa</h2>
+      <form id="compraventaForm">
+        <h4 class="mb-3">Cifras de la venta</h4>
+        <div class="mb-3"><label class="form-label">Precio del Terreno</label><input type="number" class="form-control"
+            id="precio_terreno" required></div>
+        <div class="mb-3"><label class="form-label">Gastos de Urbanización</label><input type="number"
+            class="form-control" id="gastos_urbanizacion" value="0" required></div>
+        <div class="mb-3"><label class="form-label">Total</label><input type="number" class="form-control" id="total"
+            readonly></div>
+        <div class="mb-3"><label class="form-label">Otros Descuentos</label><input type="number" class="form-control"
+            id="otros_descuentos" value="0"></div>
+        <div class="mb-3"><label class="form-label">Pago</label><input type="number" class="form-control" id="pago"
+            value="0"></div>
+        <div class="mb-3"><label class="form-label">Saldo a Pagar</label><input type="number" class="form-control"
+            id="saldo" readonly></div>
+
+        <hr class="my-4">
+
+        <h4 class="mb-3">Pago Fraccionado</h4>
+        <div id="pagosFraccionados">
+          <div class="row mb-2">
+            <div class="col-md-6"><label class="form-label">Fecha del Primer Pago</label><input type="date"
+                class="form-control pago_fecha"></div>
+            <div class="col-md-6"><label class="form-label">Cantidad del Primer Pago</label><input type="number"
+                class="form-control pago_cantidad" value="0"></div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-md-6"><label class="form-label">Fecha del Segundo Pago</label><input type="date"
+                class="form-control pago_fecha"></div>
+            <div class="col-md-6"><label class="form-label">Cantidad del Segundo Pago</label><input type="number"
+                class="form-control pago_cantidad" value="0"></div>
+          </div>
+        </div>
+
+        <div class="d-grid mt-3 mb-3">
+          <button type="button" class="btn btn-secondary" id="agregarPago">+ Agregar Pago</button>
+        </div>
+
+        <div class="mb-3"><label class="form-label">Suma de los Pagos</label><input type="number" class="form-control"
+            id="suma_pagos" readonly></div>
+
+        <div class="d-grid mt-3">
+          <button type="submit" class="btn btn-primary btn-lg">Enviar</button>
+        </div>
+      </form>
+    </div>
+
+    <div id="resultadoCompraventa" class="card shadow-lg p-4 rounded-4 mt-4 d-none">
+      <h2 class="text-center mb-4">Resumen de Compraventa</h2>
+      <ul class="list-group mb-3">
+        <li class="list-group-item"><strong>Precio del Terreno:</strong> <span id="r_precio_terreno"></span></li>
+        <li class="list-group-item"><strong>Gastos Urbanización:</strong> <span id="r_gastos_urbanizacion"></span></li>
+        <li class="list-group-item"><strong>Total:</strong> <span id="r_total"></span></li>
+        <li class="list-group-item"><strong>Otros Descuentos:</strong> <span id="r_otros_descuentos"></span></li>
+        <li class="list-group-item"><strong>Pago:</strong> <span id="r_pago"></span></li>
+        <li class="list-group-item"><strong>Saldo a Pagar:</strong> <span id="r_saldo"></span></li>
+        <li class="list-group-item"><strong>Suma de los Pagos Fraccionados:</strong> <span id="r_suma_pagos"></span>
+        </li>
+      </ul>
+      <h5>Pagos Fraccionados:</h5>
+      <ul id="r_pagos_fraccionados" class="list-group"></ul>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script src="js/app.js"></script>
+  <script>
+    const form = document.getElementById("compraventaForm");
+    const precioInput = document.getElementById("precio_terreno");
+    const gastosInput = document.getElementById("gastos_urbanizacion");
+    const totalInput = document.getElementById("total");
+    const descuentosInput = document.getElementById("otros_descuentos");
+    const pagoInput = document.getElementById("pago");
+    const saldoInput = document.getElementById("saldo");
+    const sumaPagosInput = document.getElementById("suma_pagos");
+    const pagosFraccionadosDiv = document.getElementById("pagosFraccionados");
+
+    // Cargar datos
+    const datosGuardados = cargarDatos('compraventa');
+    if (datosGuardados) {
+      rellenarFormulario(form, datosGuardados);
+      // Recrear pagos fraccionados si existen
+      if (datosGuardados.pagos) {
+        pagosFraccionadosDiv.innerHTML = ''; // Limpiar default
+        datosGuardados.pagos.forEach((pago, i) => {
+          const row = crearFilaPago(i + 1, pago.fecha, pago.cantidad);
+          pagosFraccionadosDiv.appendChild(row);
+        });
+      }
+    }
+
+    function actualizarTotalSaldo() {
+      const total = Number(precioInput.value) + Number(gastosInput.value);
+      totalInput.value = total;
+      const saldo = total - Number(descuentosInput.value) - Number(pagoInput.value);
+      saldoInput.value = saldo;
+    }
+
+    function actualizarSumaPagos() {
+      const pagos = document.querySelectorAll(".pago_cantidad");
+      let suma = 0;
+      pagos.forEach(p => suma += Number(p.value));
+      sumaPagosInput.value = suma;
+    }
+
+    precioInput.addEventListener("input", actualizarTotalSaldo);
+    gastosInput.addEventListener("input", actualizarTotalSaldo);
+    descuentosInput.addEventListener("input", actualizarTotalSaldo);
+    pagoInput.addEventListener("input", actualizarTotalSaldo);
+    pagosFraccionadosDiv.addEventListener("input", actualizarSumaPagos);
+
+    document.getElementById("agregarPago").addEventListener("click", () => {
+      const index = pagosFraccionadosDiv.children.length + 1;
+      pagosFraccionadosDiv.appendChild(crearFilaPago(index));
+    });
+
+    function crearFilaPago(index, fecha = '', cantidad = 0) {
+      const row = document.createElement("div");
+      row.className = "row mb-2";
+      row.innerHTML = `
+      <div class="col-md-6">
+        <label class="form-label">Fecha del Pago ${index}</label>
+        <input type="date" class="form-control pago_fecha" value="${fecha}">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Cantidad del Pago ${index}</label>
+        <input type="number" class="form-control pago_cantidad" value="${cantidad}">
+      </div>
+    `;
+      return row;
+    }
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      // Recolectar datos básicos
+      const formData = {};
+      const inputs = form.querySelectorAll("input:not(.pago_fecha):not(.pago_cantidad)");
+      inputs.forEach(input => {
+        if (input.id) formData[input.id] = input.value;
+      });
+
+      // Recolectar pagos fraccionados
+      const pagosList = [];
+      document.querySelectorAll("#pagosFraccionados .row").forEach(row => {
+        pagosList.push({
+          fecha: row.querySelector(".pago_fecha").value,
+          cantidad: row.querySelector(".pago_cantidad").value
+        });
+      });
+      formData.pagos = pagosList;
+
+      // Guardar
+      guardarDatos('compraventa', formData);
+
+      // Mostrar resumen
+      document.getElementById("r_precio_terreno").textContent = precioInput.value;
+      document.getElementById("r_gastos_urbanizacion").textContent = gastosInput.value;
+      document.getElementById("r_total").textContent = totalInput.value;
+      document.getElementById("r_otros_descuentos").textContent = descuentosInput.value;
+      document.getElementById("r_pago").textContent = pagoInput.value;
+      document.getElementById("r_saldo").textContent = saldoInput.value;
+      document.getElementById("r_suma_pagos").textContent = sumaPagosInput.value;
+
+      const listaPagos = document.getElementById("r_pagos_fraccionados");
+      listaPagos.innerHTML = "";
+      pagosList.forEach((pago, i) => {
+        if (pago.fecha && pago.cantidad) {
+          const li = document.createElement("li");
+          li.className = "list-group-item";
+          li.textContent = `Pago ${i + 1}: Fecha: ${pago.fecha}, Cantidad: ${pago.cantidad}`;
+          listaPagos.appendChild(li);
+        }
+      });
+
+      document.getElementById("resultadoCompraventa").classList.remove("d-none");
+      alert("Datos de compraventa guardados correctamente.");
+    });
+  </script>
+
+</body>
+
+</html>

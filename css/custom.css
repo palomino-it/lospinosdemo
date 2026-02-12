@@ -1,0 +1,350 @@
+/* css/custom.css - Tema Azul Media Noche (Dark Mode) */
+
+:root {
+    --primary-color: #191970;
+    /* Midnight Blue */
+    --background-dark: #0f0f3e;
+    /* Darker Midnight Blue for background */
+    --card-bg: #1e1e50;
+    /* Slightly lighter for cards */
+    --text-color: #ffffff;
+    /* White text */
+    --text-muted: #b0b0d0;
+    /* Muted text */
+    --accent-color: #DAA520;
+    /* Goldenrod for elegance */
+    --success-color: #28a745;
+    --btn-hover: #202080;
+}
+
+body {
+    background-color: var(--background-dark);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+}
+
+/* Navbar */
+.navbar-custom {
+    background-color: var(--primary-color) !important;
+    border-bottom: 2px solid var(--accent-color);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    letter-spacing: 1px;
+    font-size: 1.4rem;
+    color: var(--accent-color) !important;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.85) !important;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: var(--accent-color) !important;
+}
+
+/* Cards & Containers */
+.card {
+    background-color: var(--card-bg);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    color: var(--text-color);
+}
+
+.list-group-item {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.list-group-item-action:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--accent-color);
+}
+
+/* Headings & Text */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: var(--accent-color);
+    font-weight: 600;
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+/* Forms */
+.form-control {
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+}
+
+.form-control:focus {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-color: var(--accent-color);
+    color: var(--text-color);
+    box-shadow: 0 0 0 0.25rem rgba(218, 165, 32, 0.25);
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Buttons - Estilo Unificado Premium (Dorado) */
+.btn-primary {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+    color: var(--primary-color);
+    /* Texto azul sobre fondo dorado para contraste */
+    padding: 12px 28px;
+    /* Un poco más grandes */
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-size: 0.9rem;
+}
+
+.btn-primary:hover {
+    background-color: #f0c040;
+    /* Un dorado más brillante al hover */
+    border-color: #f0c040;
+    color: var(--background-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(218, 165, 32, 0.5);
+    /* Glow dorado */
+}
+
+/* Reutilizar btn-primary para todo, o definir btn-secondary si hace falta */
+.btn-secondary {
+    background-color: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    color: var(--text-color);
+}
+
+.btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--text-color);
+}
+
+.btn-outline-dark {
+    /* Used for demo button, updating for dark mode */
+    color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.btn-outline-dark:hover {
+    background-color: var(--accent-color);
+    color: var(--primary-color);
+}
+
+/* Tables */
+.table {
+    color: var(--text-color);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.table> :not(caption)>*>* {
+    background-color: transparent;
+    /* Let container bg show through */
+    color: var(--text-color);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.table-striped>tbody>tr:nth-of-type(odd)>* {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: var(--text-color);
+}
+
+.table-hover>tbody>tr:hover>* {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--accent-color);
+}
+
+/* Logos */
+.logo-navbar {
+    height: 40px;
+    margin-right: 17px;
+}
+
+.logo-main {
+    max-width: 150px;
+    margin-bottom: 2rem;
+}
+
+/* Print Styles Override - Keep it clean and white for saving ink */
+/* Print Styles Override - Reporte Ejecutivo Formal */
+@media print {
+    @page {
+        margin: 1.5cm;
+        size: letter portrait;
+    }
+
+    body {
+        background-color: white !important;
+        color: #000 !important;
+        font-family: 'Arial', sans-serif !important;
+        font-size: 11pt !important;
+    }
+
+    .no-print,
+    .navbar-custom,
+    .btn,
+    .modal {
+        display: none !important;
+    }
+
+    .card,
+    .container,
+    .row {
+        box-shadow: none !important;
+        background-color: transparent !important;
+        border: none !important;
+        max-width: 100% !important;
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Header Ejecutivo */
+    .print-header {
+        display: block !important;
+        border-bottom: 2px solid #000;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+    }
+
+    .print-logos {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .print-logo {
+        height: 60px;
+        width: auto;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        color: #000 !important;
+        text-transform: uppercase;
+        font-family: 'Arial', sans-serif;
+        /* Títulos en sans-serif */
+        margin-bottom: 5px;
+    }
+
+    h1 {
+        font-size: 18pt;
+        font-weight: bold;
+    }
+
+    h2 {
+        font-size: 16pt;
+    }
+
+    h3 {
+        font-size: 14pt;
+    }
+
+    /* Secciones */
+    .print-section {
+        margin-bottom: 20px;
+        border: 1px solid #000;
+        padding: 10px;
+        page-break-inside: avoid;
+    }
+
+    .print-label {
+        font-weight: bold;
+        color: #444;
+        font-size: 10pt;
+    }
+
+    .print-value {
+        font-weight: normal;
+        font-size: 11pt;
+        color: #000;
+    }
+
+    /* Tablas */
+    .table,
+    .table * {
+        font-family: 'Arial', sans-serif !important;
+        font-size: 11pt !important;
+    }
+
+    .table th {
+        background-color: #eee !important;
+        color: #000 !important;
+        border: 1px solid #000 !important;
+        padding: 5px;
+        text-align: center;
+    }
+
+    .table td {
+        border: 1px solid #000 !important;
+        padding: 5px;
+        color: #000 !important;
+    }
+
+    .table-striped>tbody>tr:nth-of-type(odd)>* {
+        background-color: transparent !important;
+        color: black !important;
+    }
+
+    /* Resumen Financiero en Impresión */
+    .print-summary-box {
+        border: 1px solid #000;
+        padding: 10px;
+        text-align: center;
+        margin: 5px;
+    }
+
+    /* Forzar texto negro en badges/cards que eran de color */
+    /* Forzar texto negro en badges/cards que eran de color, y clases de texto */
+    .bg-primary,
+    .bg-success,
+    .bg-danger,
+    .bg-warning,
+    .bg-info,
+    .text-white,
+    .text-light,
+    .text-primary,
+    .text-secondary,
+    .text-success,
+    .text-danger,
+    .text-warning,
+    .text-info,
+    .text-dark,
+    .text-muted {
+        background-color: transparent !important;
+        color: #000 !important;
+        border: 1px solid #ccc;
+        text-shadow: none !important;
+    }
+
+    /* Quitar borde a items de solo texto si es necesario */
+    .text-white,
+    .text-light,
+    .text-muted {
+        border: none;
+    }
+}
