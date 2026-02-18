@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Procesar Datos</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="css/custom.css" rel="stylesheet">
 </head>
 
 <body>
@@ -16,13 +17,14 @@
         <img src="img/RLP_LOGO.png" alt="RLP" class="logo-navbar">
         <img src="img/ML_LOGO.png" alt="ML" class="logo-navbar">
       </a>
-      <div class="collapse navbar-collapse">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Menú Principal</a></li>
-          <li class="nav-item"><a class="nav-link" href="titular.html">👤 Titular</a></li>
-          <li class="nav-item"><a class="nav-link" href="beneficiario.html">🤝 Beneficiario</a></li>
-          <li class="nav-item"><a class="nav-link" href="inmueble.html">🏠 Inmueble</a></li>
-          <li class="nav-item"><a class="nav-link" href="compraventa.html">💰 Compraventa</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Principal</a></li>
+          <li class="nav-item"><a class="nav-link" href="inventario.html">📦 Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" href="clientes.html">👥 Clientes</a></li>
           <li class="nav-item"><a class="nav-link" href="estado_cuenta.html">💼 Estado de Cuenta</a></li>
         </ul>
       </div>
@@ -99,15 +101,28 @@
       </div>
 
       <div class="d-grid gap-2 mt-4 d-print-none">
-        <button class="btn btn-primary btn-lg" onclick="window.print()">🖨️ Imprimir Ficha del Cliente</button>
-        <button class="btn btn-primary btn-lg" id="btn-finalizar">✅ Finalizar y Guardar Expediente</button>
-        <button class="btn btn-outline-danger" id="btn-limpiar">🗑️ Borrar Todo e Iniciar de Nuevo</button>
+        <button class="btn btn-secondary btn-lg" onclick="window.print()">🖨️ Imprimir Ficha</button>
+        <button class="btn btn-success btn-lg" id="btn-finalizar">✅ Confirmar y Guardar Expediente</button>
+        <button class="btn btn-outline-danger" id="btn-limpiar">🗑️ Borrar y Reiniciar</button>
       </div>
     </div>
   </div>
 
+  <style>
+    /* Forzar ocultamiento en pantalla sin depender de caché de CSS externo */
+    #print-area {
+      display: none !important;
+    }
+
+    @media print {
+      #print-area {
+        display: block !important;
+      }
+    }
+  </style>
+
   <!-- ================= Plantilla de Impresión ================= -->
-  <div class="d-none d-print-block p-4" id="print-area">
+  <div class="p-4" id="print-area">
     <div class="print-header mb-5">
       <div class="print-logos">
         <img src="img/RLP_LOGO.png" alt="RLP" class="print-logo">
@@ -197,7 +212,7 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/app.js"></script>
   <script>
-    function renderObject(obj, containerId) {
+    function renderObject(obj, containerId, editUrl) {
       if (!obj) return;
       let html = '<ul class="list-group">';
       for (const [key, value] of Object.entries(obj)) {
@@ -208,11 +223,21 @@
               html += `<li class="list-group-item ms-3">Pago ${i + 1}: ${p.fecha} - Q${p.cantidad}</li>`;
             });
           }
+        } else if (['id_existente', 'es_existente', 'es_cliente_existente'].includes(key)) {
+          // Ocultar claves internas
+          continue;
         } else {
           html += `<li class="list-group-item"><strong>${key}:</strong> ${value}</li>`;
         }
       }
       html += '</ul>';
+
+      if (editUrl) {
+        html += `<div class="mt-3 text-end d-print-none">
+                   <a href="${editUrl}" class="btn btn-sm btn-outline-primary">✏️ Editar</a>
+                 </div>`;
+      }
+
       const container = document.getElementById(containerId);
       if (container) container.innerHTML = html;
     }
@@ -235,10 +260,10 @@
     const compraventa = cargarDatos('compraventa');
 
     // Render Web View
-    renderObject(titular, 'resumen-titular');
-    renderObject(beneficiario, 'resumen-beneficiario');
-    renderObject(inmueble, 'resumen-inmueble');
-    renderObject(compraventa, 'resumen-compraventa');
+    renderObject(titular, 'resumen-titular', 'titular.html');
+    renderObject(beneficiario, 'resumen-beneficiario', 'beneficiario.html');
+    renderObject(inmueble, 'resumen-inmueble', 'inmueble.html');
+    renderObject(compraventa, 'resumen-compraventa', 'compraventa.html');
 
     // Render Print View
     const fechaPrint = document.getElementById('print-fecha');
@@ -274,41 +299,46 @@
 
       console.log("Enviando datos al backend:", payload);
 
-      // Guardar en "DB Local" para simulación de Estado de Cuenta
+      // Guardar en "DB Local" para simulación de Estado de Cuenta (Backup)
       const nuevoId = guardarClienteDB(payload);
 
+      // Validación de protocolo (¿Está en localhost?)
+      if (window.location.protocol === 'file:') {
+        alert("⚠️ ADVERTENCIA ⚠️\n\nEstás abriendo el archivo directamente (file://).\nPara guardar en la BASE DE DATOS, debes abrirlo desde el servidor local (http://localhost/lospinos/...).\n\nLos datos se guardarán SOLO en el navegador por ahora.");
+        limpiarTodo();
+        window.location.href = "index.html";
+        return; // Detener intento de fetch
+      }
+
       try {
-        // Intentar enviar a PHP (esto fallará si no hay servidor, pero atrapamos el error para demo)
         const response = await fetch('procesar_formulario.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        const result = await response.json();
+        // Leer texto crudo para depurar errores de PHP que no sean JSON
+        const rawText = await response.text();
+        let result;
+
+        try {
+          result = JSON.parse(rawText);
+        } catch (e) {
+          throw new Error("El servidor respondió con datos inválidos (no JSON).\nPosible error de PHP:\n" + rawText.substring(0, 200));
+        }
+
         if (result.success) {
-          alert("¡Éxito! Expediente guardado en Base de Datos. ID: " + nuevoId);
+          alert("✅ ¡Éxito! Expediente guardado en MySQL.\nID generado: " + result.id);
           limpiarTodo();
           window.location.href = "index.html";
         } else {
-          alert("Error del servidor: " + result.message);
+          alert("❌ Error del servidor MySQL: " + result.message);
         }
       } catch (error) {
-        console.warn("Fallo de red (esperado si no hay backend PHP corriendo):", error);
-        // Fallback para demo
-        const alertDiv = document.getElementById('alert-container');
-        if (alertDiv) {
-          alertDiv.innerHTML = `
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <strong>¡Simulación Exitosa!</strong><br>
-                Cliente guardado localmente con ID: <strong>${nuevoId}</strong>.<br>
-                Ahora puedes verlo en "Estado de Cuenta".
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `;
-        }
-        alert("DEMO: Cliente guardado localmente. ID: " + nuevoId);
-        // Opcional: limpiarTodo() tras unos segundos o dejar que el usuario lo haga
+        console.error(error);
+        alert("❌ Error de Conexión:\n" + error.message + "\n\nSe ha guardado una copia LOCAL (Demo).");
+        limpiarTodo();
+        // window.location.href = "index.html"; // Opcional: recargar
       }
     });
   </script>

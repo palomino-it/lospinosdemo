@@ -22,11 +22,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Menú Principal</a></li>
-          <li class="nav-item"><a class="nav-link" href="titular.html">👤 Titular</a></li>
-          <li class="nav-item"><a class="nav-link active" href="beneficiario.html">🤝 Beneficiario</a></li>
-          <li class="nav-item"><a class="nav-link" href="inmueble.html">🏠 Inmueble</a></li>
-          <li class="nav-item"><a class="nav-link" href="compraventa.html">💰 Compraventa</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Principal</a></li>
+          <li class="nav-item"><a class="nav-link" href="inventario.html">📦 Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" href="clientes.html">👥 Clientes</a></li>
           <li class="nav-item"><a class="nav-link" href="estado_cuenta.html">💼 Estado de Cuenta</a></li>
         </ul>
       </div>
@@ -36,7 +34,32 @@
 
 
   <div class="container mt-5 pt-5">
-    <div class="card shadow-lg p-4 rounded-4">
+
+    <!-- Botón para abrir buscador -->
+    <div class="text-end mb-3">
+      <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalBuscarBeneficiario">
+        🔍 Buscar Beneficiario Existente
+      </button>
+    </div>
+
+    <!-- Panel Beneficiario Seleccionado (Oculto por defecto) -->
+    <div id="beneficiarioExistentePanel" class="card shadow-lg p-4 rounded-4 mb-4 d-none"
+      style="border-left: 5px solid var(--accent-color);">
+      <h2 class="text-center mb-4">✅ Beneficiario Seleccionado</h2>
+      <div class="alert alert-info">
+        <h4 id="be-nombre"></h4>
+        <p class="mb-1"><strong>DPI:</strong> <span id="be-dpi"></span></p>
+        <p class="mb-1"><strong>Teléfono:</strong> <span id="be-telefonos"></span></p>
+        <p class="mb-0"><strong>Dirección:</strong> <span id="be-direccion"></span></p>
+      </div>
+      <div class="d-grid gap-2">
+        <button id="btn-usar-este" class="btn btn-success btn-lg">➡️ Confirmar y Continuar</button>
+        <button id="btn-cambiar-beneficiario" class="btn btn-outline-danger">🔄 Cambiar / Nuevo</button>
+      </div>
+    </div>
+
+    <!-- Panel Formulario (Visible por defecto) -->
+    <div id="formularioPanel" class="card shadow-lg p-4 rounded-4">
       <h2 class="text-center mb-4">Formulario de Beneficiario</h2>
       <form id="beneficiarioForm">
         <!-- Nombre -->
@@ -74,6 +97,37 @@
     <div id="resultadoBeneficiario" class="card shadow-lg p-4 rounded-4 mt-4 d-none">
       <h2 class="text-center mb-4">Datos del Beneficiario</h2>
       </ul>
+      <div class="d-grid mt-4">
+        <a href="inmueble.html" class="btn btn-success btn-lg">➡️ Ir a Siguiente Paso: Inmueble</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Buscar Beneficiario -->
+  <div class="modal fade" id="modalBuscarBeneficiario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Buscar Beneficiario Existente</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" id="inputBuscarBeneficiario" class="form-control mb-3"
+            placeholder="Escribe nombre o DPI...">
+          <div class="table-responsive">
+            <table class="table table-hover">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>DPI</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-resultados-beneficiarios"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -82,11 +136,118 @@
   <script>
     // Cargar datos al iniciar
     const form = document.getElementById("beneficiarioForm");
+    let beneficiarioSeleccionado = null;
+
+    // Lógica para cargar beneficiarios en el modal
+    document.getElementById('modalBuscarBeneficiario').addEventListener('show.bs.modal', async function () {
+      try {
+        const res = await fetch('obtener_beneficiarios.php');
+        const data = await res.json();
+        const tbody = document.getElementById('tabla-resultados-beneficiarios');
+        const input = document.getElementById('inputBuscarBeneficiario');
+
+        function render(lista) {
+          tbody.innerHTML = '';
+          lista.forEach(b => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${b.nombre}</td><td>${b.dpi || '-'}</td><td><button class="btn btn-sm btn-primary btn-seleccionar" data-json='${JSON.stringify(b)}'>Seleccionar</button></td>`;
+            tbody.appendChild(tr);
+          });
+
+          // Event listeners botones
+          document.querySelectorAll('.btn-seleccionar').forEach(btn => {
+            btn.addEventListener('click', function () {
+              const ben = JSON.parse(this.getAttribute('data-json'));
+              seleccionarBeneficiario(ben);
+              const modal = bootstrap.Modal.getInstance(document.getElementById('modalBuscarBeneficiario'));
+              modal.hide();
+            });
+          });
+        }
+
+        render(data);
+
+        input.addEventListener('keyup', (e) => {
+          const term = e.target.value.toLowerCase();
+          const filtrados = data.filter(b => b.nombre.toLowerCase().includes(term) || (b.dpi && b.dpi.includes(term)));
+          render(filtrados);
+        });
+
+      } catch (e) { console.error(e); }
+    });
+
+    function seleccionarBeneficiario(b) {
+      beneficiarioSeleccionado = b;
+      // Mostrar panel existente
+      document.getElementById('formularioPanel').classList.add('d-none');
+      document.getElementById('beneficiarioExistentePanel').classList.remove('d-none');
+
+      document.getElementById('be-nombre').textContent = b.nombre;
+      document.getElementById('be-dpi').textContent = b.dpi;
+      document.getElementById('be-telefonos').textContent = b.telefono || b.telefonos; // Adaptar según columna DB
+      document.getElementById('be-direccion').textContent = b.direccion;
+    }
+
+    // Botones del panel seleccionado
+    document.getElementById('btn-cambiar-beneficiario').addEventListener('click', function () {
+      beneficiarioSeleccionado = null;
+      document.getElementById('formularioPanel').classList.remove('d-none');
+      document.getElementById('beneficiarioExistentePanel').classList.add('d-none');
+    });
+
+    document.getElementById('btn-usar-este').addEventListener('click', function () {
+      // Guardar como si fuera el form submit, pero con flag existente
+      if (!beneficiarioSeleccionado) return;
+
+      const datos = {
+        id_existente: beneficiarioSeleccionado.id,
+        b_nombre: beneficiarioSeleccionado.nombre,
+        b_direccion: beneficiarioSeleccionado.direccion,
+        b_dpi: beneficiarioSeleccionado.dpi,
+        b_telefonos: beneficiarioSeleccionado.telefono || beneficiarioSeleccionado.telefonos,
+        b_email: beneficiarioSeleccionado.email || '',
+        es_existente: true
+      };
+
+      guardarDatos('beneficiario', datos);
+
+      // Simular feedback visual y redirección
+      const resultadoDiv = document.getElementById("resultadoBeneficiario");
+      resultadoDiv.innerHTML = `
+            <h2 class="text-center mb-4">Datos del Beneficiario</h2>
+            <ul class="list-group">
+              <li class="list-group-item"><strong>Nombre:</strong> <span>${datos.b_nombre}</span></li>
+              <li class="list-group-item"><strong>DPI:</strong> <span>${datos.b_dpi}</span></li>
+              <li class="list-group-item active text-center">✅ Vinculado de Base de Datos</li>
+            </ul>
+            <div class="d-grid mt-4">
+                <a href="inmueble.html" class="btn btn-success btn-lg">➡️ Ir a Siguiente Paso: Inmueble</a>
+            </div>`;
+
+      document.getElementById('beneficiarioExistentePanel').classList.add('d-none');
+      resultadoDiv.classList.remove('d-none');
+    });
 
     // Intentar cargar datos previos
     const datosGuardados = cargarDatos('beneficiario');
     if (datosGuardados) {
-      rellenarFormulario(form, datosGuardados);
+      if (datosGuardados.es_existente) {
+        seleccionarBeneficiario({
+          id: datosGuardados.id_existente,
+          nombre: datosGuardados.b_nombre,
+          dpi: datosGuardados.b_dpi,
+          direccion: datosGuardados.b_direccion,
+          telefonos: datosGuardados.b_telefonos
+        });
+        // Ya seleccionado, podríamos mostrar directo el resultado o el panel de "Seleccionado"
+        // Mostramos el panel de seleccionado para confirmar de nuevo o el resultado?
+        // Mejor el de resultado para avanzar
+        document.getElementById('btn-usar-este').click();
+      } else {
+        rellenarFormulario(form, datosGuardados);
+        // Mostrar botón de siguiente paso
+        document.getElementById("resultadoBeneficiario").classList.remove("d-none");
+      }
     }
 
     form.addEventListener("submit", function (e) {
@@ -112,7 +273,10 @@
           <li class="list-group-item"><strong>DPI/CUI:</strong> <span>${formData['b_dpi'] || ''}</span></li>
           <li class="list-group-item"><strong>Teléfonos:</strong> <span>${formData['b_telefonos'] || ''}</span></li>
           <li class="list-group-item"><strong>Email:</strong> <span>${formData['b_email'] || ''}</span></li>
-        </ul>`;
+        </ul>
+        <div class="d-grid mt-4">
+            <a href="inmueble.html" class="btn btn-success btn-lg">➡️ Ir a Siguiente Paso: Inmueble</a>
+        </div>`;
 
       resultadoDiv.classList.remove("d-none");
 

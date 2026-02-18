@@ -22,11 +22,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Menú Principal</a></li>
-          <li class="nav-item"><a class="nav-link" href="titular.html">👤 Titular</a></li>
-          <li class="nav-item"><a class="nav-link" href="beneficiario.html">🤝 Beneficiario</a></li>
-          <li class="nav-item"><a class="nav-link active" href="inmueble.html">🏠 Inmueble</a></li>
-          <li class="nav-item"><a class="nav-link" href="compraventa.html">💰 Compraventa</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Principal</a></li>
+          <li class="nav-item"><a class="nav-link" href="inventario.html">📦 Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" href="clientes.html">👥 Clientes</a></li>
           <li class="nav-item"><a class="nav-link" href="estado_cuenta.html">💼 Estado de Cuenta</a></li>
         </ul>
       </div>
@@ -39,10 +37,19 @@
     <div class="card shadow-lg p-4 rounded-4">
       <h2 class="text-center mb-4">Identificación del Inmueble</h2>
       <form id="inmuebleForm">
-        <!-- Campos del inmueble -->
+        <!-- Botón Selección -->
+        <div class="text-end mb-3">
+          <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#modalInventario">
+            📦 Seleccionar del Inventario
+          </button>
+        </div>
+
+        <!-- Campos del inmueble (Readonly parcialmente para forzar selección o permitir manual si es necesario) -->
         <div class="mb-3">
-          <label for="lotes" class="form-label">Lote(s)</label>
-          <input type="text" class="form-control" id="lotes" placeholder="Ejemplo: Lote 3, 4" required>
+          <label for="lotes" class="form-label">Lote(s) / Ubicación</label>
+          <input type="text" class="form-control" id="lotes" placeholder="Seleccione del inventario..." required
+            readonly>
+          <input type="hidden" id="inventario_id"> <!-- ID oculto para referencia -->
         </div>
 
         <div class="mb-3">
@@ -97,6 +104,39 @@
         <li class="list-group-item"><strong>Libro No.:</strong> <span id="r-libro"></span></li>
         <li class="list-group-item"><strong>De (Lugar):</strong> <span id="r-de_lugar"></span></li>
       </ul>
+      <div class="d-grid mt-4">
+        <a href="compraventa.html" class="btn btn-success btn-lg">➡️ Ir a Siguiente Paso: Compraventa</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Inventario -->
+  <div class="modal fade" id="modalInventario" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Seleccionar Inmueble Disponible</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="table-responsive">
+            <table class="table table-hover table-striped">
+              <thead class="table-dark">
+                <tr>
+                  <th>Ubicación</th>
+                  <th>Área</th>
+                  <th>Precio</th>
+                  <th>Registro</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody id="lista-inventario-modal">
+                <!-- JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -104,11 +144,70 @@
 
   <script src="js/app.js"></script>
   <script>
+    // Lógica del Modal Inventario
+    document.getElementById('modalInventario').addEventListener('show.bs.modal', async () => {
+      try {
+        const res = await fetch('obtener_lotes_disponibles.php');
+        const lotes = await res.json();
+        const tbody = document.getElementById('lista-inventario-modal');
+        tbody.innerHTML = '';
+
+        if (lotes.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="5" class="text-center">No hay lotes disponibles.</td></tr>';
+          return;
+        }
+
+        lotes.forEach(l => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+                    <td>MZ <strong>${l.manzana}</strong> - Lote <strong>${l.lote}</strong></td>
+                    <td>${l.area}</td>
+                    <td>Q${parseFloat(l.precio_total).toLocaleString()}</td>
+                    <td>F:${l.finca} F:${l.folio} L:${l.libro}</td>
+                    <td><button class="btn btn-primary btn-sm btn-seleccionar-lote" data-json='${JSON.stringify(l)}'>Seleccionar</button></td>
+                `;
+          tbody.appendChild(tr);
+        });
+
+        document.querySelectorAll('.btn-seleccionar-lote').forEach(btn => {
+          btn.addEventListener('click', function () {
+            const data = JSON.parse(this.getAttribute('data-json'));
+            seleccionarLote(data);
+            bootstrap.Modal.getInstance(document.getElementById('modalInventario')).hide();
+          });
+        });
+
+      } catch (e) { console.error(e); }
+    });
+
+    function seleccionarLote(lote) {
+      // Llenar formulario
+      document.getElementById('lotes').value = `Lote ${lote.lote}`;
+      document.getElementById('manzana').value = `Manzana ${lote.manzana}`;
+      document.getElementById('area').value = lote.area;
+      document.getElementById('finca').value = lote.finca;
+      document.getElementById('folio').value = lote.folio;
+      document.getElementById('libro').value = lote.libro;
+      document.getElementById('inventario_id').value = lote.id;
+
+      // Bloquear campos para evitar edición manual errónea
+      ['manzana', 'area', 'finca', 'folio', 'libro'].forEach(id => {
+        document.getElementById(id).readOnly = true;
+      });
+
+      // Opcional: Guardar precio en algún lado si se necesita en Compraventa
+      // Podríamos guardar un dato temporal para la siguiente página
+      localStorage.setItem('precio_sugerido', lote.precio_total);
+    }
+
     // Cargar datos al iniciar
     const form = document.getElementById("inmuebleForm");
     const datosGuardados = cargarDatos('inmueble');
+
     if (datosGuardados) {
       rellenarFormulario(form, datosGuardados);
+      // Mostrar botón de siguiente paso
+      document.getElementById("resultadoInmueble").classList.remove("d-none");
     }
 
     form.addEventListener("submit", function (e) {

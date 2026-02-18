@@ -22,11 +22,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Menú Principal</a></li>
-          <li class="nav-item"><a class="nav-link" href="titular.html">👤 Titular</a></li>
-          <li class="nav-item"><a class="nav-link" href="beneficiario.html">🤝 Beneficiario</a></li>
-          <li class="nav-item"><a class="nav-link" href="inmueble.html">🏠 Inmueble</a></li>
-          <li class="nav-item"><a class="nav-link active" href="compraventa.html">💰 Compraventa</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Principal</a></li>
+          <li class="nav-item"><a class="nav-link" href="inventario.html">📦 Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" href="clientes.html">👥 Clientes</a></li>
           <li class="nav-item"><a class="nav-link" href="estado_cuenta.html">💼 Estado de Cuenta</a></li>
         </ul>
       </div>
@@ -97,6 +95,9 @@
       </ul>
       <h5>Pagos Fraccionados:</h5>
       <ul id="r_pagos_fraccionados" class="list-group"></ul>
+      <div class="d-grid mt-4">
+        <a href="procesar.html" class="btn btn-primary btn-lg">➡️ Ir a Revisar y Guardar</a>
+      </div>
     </div>
   </div>
 
@@ -126,6 +127,8 @@
           pagosFraccionadosDiv.appendChild(row);
         });
       }
+      // Mostrar botón de siguiente paso
+      document.getElementById("resultadoCompraventa").classList.remove("d-none");
     }
 
     function actualizarTotalSaldo() {

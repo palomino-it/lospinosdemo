@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS Titulares (
     nombre VARCHAR(150),
     direccion VARCHAR(255),
     telefono VARCHAR(50),
-    dpi VARCHAR(50),
+    dpi VARCHAR(50) UNIQUE,  -- DPI único (PK lógica)
     nit VARCHAR(50),
     fecha_nacimiento DATE,
     edad INT,
@@ -25,30 +25,39 @@ CREATE TABLE IF NOT EXISTS Titulares (
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
--- Tabla 2: Beneficiarios
-CREATE TABLE IF NOT EXISTS Beneficiarios (
+-- (Beneficiarios y Titulares_Beneficiarios... se mantienen igual)
+
+-- Tabla 3: Inventario de Lotes (Nuevo Maestro de Inmuebles)
+CREATE TABLE IF NOT EXISTS InventarioLotes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    titular_id INT,
-    nombre VARCHAR(150),
-    direccion VARCHAR(255),
-    dpi VARCHAR(50),
-    telefonos VARCHAR(100),
-    email VARCHAR(100),
-    FOREIGN KEY (titular_id) REFERENCES Titulares(id) ON DELETE CASCADE
+    manzana VARCHAR(50),
+    lote VARCHAR(50),
+    area VARCHAR(50),
+    finca VARCHAR(50),
+    folio VARCHAR(50),
+    libro VARCHAR(50),
+    valor_vara2 DECIMAL(10, 2), -- Precio por vara cuadrada
+    precio_total DECIMAL(12, 2),
+    estado ENUM('DISPONIBLE', 'RESERVADO', 'VENDIDO') DEFAULT 'DISPONIBLE',
+    UNIQUE KEY unique_ubicacion (manzana, lote),
+    UNIQUE KEY unique_registro (finca, folio, libro)
 );
 
--- Tabla 3: Inmuebles
+-- Tabla 4: Inmuebles (Historial de Venta)
+-- Se mantiene para compatibilidad, pero idealmente debería apuntar al inventario
 CREATE TABLE IF NOT EXISTS Inmuebles (
     id INT AUTO_INCREMENT PRIMARY KEY,
     titular_id INT,
-    lotes VARCHAR(100),
+    inventario_id INT, -- Vinculación con el inventario
+    lotes VARCHAR(100), -- Se guarda copia por si cambia el inventario
     manzana VARCHAR(50),
     area VARCHAR(50),
     finca VARCHAR(50),
     folio VARCHAR(50),
     libro VARCHAR(50),
     de_lugar VARCHAR(100),
-    FOREIGN KEY (titular_id) REFERENCES Titulares(id) ON DELETE SET NULL
+    FOREIGN KEY (titular_id) REFERENCES Titulares(id) ON DELETE SET NULL,
+    FOREIGN KEY (inventario_id) REFERENCES InventarioLotes(id) ON DELETE SET NULL
 );
 
 -- Tabla 4: Compraventas

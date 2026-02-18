@@ -25,47 +25,103 @@ try {
     /* -------------------------------------------------------------
        1. Insertar TITULAR
        ------------------------------------------------------------- */
-    $t = $data['titular'];
-    $sqlTitular = "INSERT INTO Titulares (nombre, direccion, telefono, dpi, nit, fecha_nacimiento, edad, estado_civil, nacionalidad, profesion, empresa, direccion_trabajo, telefonos_trabajo, puesto, tiempo_trabajo, salario, otros_ingresos) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-    
-    $stmt = $conn->prepare($sqlTitular);
-    $stmt->bind_param("ssssssissssssssdd", 
-        $t['nombre'], $t['direccion'], $t['telefono'], $t['dpi'], $t['nit'], $t['fecha_nacimiento'], 
-        $t['edad'], $t['estado_civil'], $t['nacionalidad'], $t['profesion'], $t['empresa'], 
-        $t['direccion_trabajo'], $t['telefonos_trabajo'], $t['puesto'], $t['tiempo_trabajo'], 
-        $t['salario'], $t['otros_ingresos']
-    );
-    
-    if (!$stmt->execute()) throw new Exception("Error Titular: " . $stmt->error);
-    $titularId = $conn->insert_id;
-    $stmt->close();
-
     /* -------------------------------------------------------------
-       2. Insertar BENEFICIARIO
+       1. Insertar TITULAR o Usar Existente
        ------------------------------------------------------------- */
-    $b = $data['beneficiario'];
-    // Validar si existe beneficiario
-    if (!empty($b['b_nombre'])) {
-        $sqlBeneficiario = "INSERT INTO Beneficiarios (titular_id, nombre, direccion, dpi, telefonos, email) 
-                            VALUES (?, ?, ?, ?, ?, ?)";
-        $stmt = $conn->prepare($sqlBeneficiario);
-        $stmt->bind_param("isssss", $titularId, $b['b_nombre'], $b['b_direccion'], $b['b_dpi'], $b['b_telefonos'], $b['b_email']);
-        if (!$stmt->execute()) throw new Exception("Error Beneficiario: " . $stmt->error);
+    $t = $data['titular'];
+    $titularId = 0;
+
+    if (isset($t['id_existente']) && $t['id_existente'] > 0) {
+        // Cliente ya existe, usamos su ID
+        $titularId = $t['id_existente'];
+    } else {
+        // Cliente nuevo, insertar
+        $sqlTitular = "INSERT INTO Titulares (nombre, direccion, telefono, dpi, nit, fecha_nacimiento, edad, estado_civil, nacionalidad, profesion, empresa, direccion_trabajo, telefonos_trabajo, puesto, tiempo_trabajo, salario, otros_ingresos) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        $stmt = $conn->prepare($sqlTitular);
+        $stmt->bind_param("ssssssissssssssdd", 
+            $t['nombre'], $t['direccion'], $t['telefono'], $t['dpi'], $t['nit'], $t['fecha_nacimiento'], 
+            $t['edad'], $t['estado_civil'], $t['nacionalidad'], $t['profesion'], $t['empresa'], 
+            $t['direccion_trabajo'], $t['telefonos_trabajo'], $t['puesto'], $t['tiempo_trabajo'], 
+            $t['salario'], $t['otros_ingresos']
+        );
+        
+        if (!$stmt->execute()) throw new Exception("Error Titular: " . $stmt->error);
+        $titularId = $conn->insert_id;
         $stmt->close();
     }
 
     /* -------------------------------------------------------------
-       3. Insertar INMUEBLE
+       2. Insertar o Vincular BENEFICIARIO (Many-to-Many)
+       ------------------------------------------------------------- */
+    $b = $data['beneficiario'];
+    // Validar si existe beneficiario
+    if (!empty($b['b_nombre'])) {
+        $beneficiarioId = 0;
+        
+        // --- Opción A: Cliente envió un ID de beneficiario existente (seleccionado de la lista)
+        if (isset($b['id_existente']) && $b['id_existente'] > 0) {
+            $beneficiarioId = $b['id_existente'];
+        } 
+        // --- Opción B: Es un nuevo beneficiario, pero verificamos duplicados por DPI
+        else {
+            // Intentar buscar por DPI primero
+            $dpi = $b['b_dpi'] ?? '';
+            $existeSql = "SELECT id FROM Beneficiarios WHERE dpi = ? AND dpi != '' LIMIT 1";
+            $stmtCheck = $conn->prepare($existeSql);
+            $stmtCheck->bind_param("s", $dpi);
+            $stmtCheck->execute();
+            $stmtCheck->bind_result($existingId);
+            if ($stmtCheck->fetch()) {
+                $beneficiarioId = $existingId;
+            }
+            $stmtCheck->close();
+
+            // Si no existe, insertar nuevo
+            if ($beneficiarioId == 0) {
+                $sqlBeneficiario = "INSERT INTO Beneficiarios (nombre, direccion, dpi, telefonos, email) 
+                                    VALUES (?, ?, ?, ?, ?)";
+                $stmt = $conn->prepare($sqlBeneficiario);
+                $stmt->bind_param("sssss", $b['b_nombre'], $b['b_direccion'], $b['b_dpi'], $b['b_telefonos'], $b['b_email']);
+                if (!$stmt->execute()) throw new Exception("Error Crear Beneficiario: " . $stmt->error);
+                $beneficiarioId = $conn->insert_id;
+                $stmt->close();
+            }
+        }
+
+        // --- Vincular Titular con Beneficiario en Tabla Intermedia
+        if ($beneficiarioId > 0) {
+            $sqlLink = "INSERT INTO Titulares_Beneficiarios (titular_id, beneficiario_id) VALUES (?, ?)";
+            $stmtLink = $conn->prepare($sqlLink);
+            $stmtLink->bind_param("ii", $titularId, $beneficiarioId);
+            if (!$stmtLink->execute()) throw new Exception("Error Vinculando Beneficiario: " . $stmtLink->error);
+            $stmtLink->close();
+        }
+    }
+
+    /* -------------------------------------------------------------
+       3. Insertar INMUEBLE (y actualizar Inventario)
        ------------------------------------------------------------- */
     $i = $data['inmueble'];
-    $sqlInmueble = "INSERT INTO Inmuebles (titular_id, lotes, manzana, area, finca, folio, libro, de_lugar) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $inventarioId = isset($i['inventario_id']) ? intval($i['inventario_id']) : NULL;
+
+    $sqlInmueble = "INSERT INTO Inmuebles (titular_id, inventario_id, lotes, manzana, area, finca, folio, libro, de_lugar) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = $conn->prepare($sqlInmueble);
-    $stmt->bind_param("isssssss", $titularId, $i['lotes'], $i['manzana'], $i['area'], $i['finca'], $i['folio'], $i['libro'], $i['de_lugar']);
+    $stmt->bind_param("iisssssss", $titularId, $inventarioId, $i['lotes'], $i['manzana'], $i['area'], $i['finca'], $i['folio'], $i['libro'], $i['de_lugar']);
     if (!$stmt->execute()) throw new Exception("Error Inmueble: " . $stmt->error);
     $inmuebleId = $conn->insert_id;
     $stmt->close();
+
+    // Actualizar estado del inventario a VENDIDO
+    if ($inventarioId) {
+        $sqlUpdateInv = "UPDATE InventarioLotes SET estado = 'VENDIDO' WHERE id = ?";
+        $stmtUpdate = $conn->prepare($sqlUpdateInv);
+        $stmtUpdate->bind_param("i", $inventarioId);
+        $stmtUpdate->execute();
+        $stmtUpdate->close();
+    }
 
     /* -------------------------------------------------------------
        4. Insertar COMPRAVENTA

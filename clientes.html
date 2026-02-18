@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Registro de Clientes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <img src="img/RLP_LOGO.png" alt="RLP" class="logo-navbar">
+                <img src="img/ML_LOGO.png" alt="ML" class="logo-navbar">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">🏠 Principal</a></li>
+                    <li class="nav-item"><a class="nav-link" href="inventario.html">📦 Inventario</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="clientes.html">👥 Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="estado_cuenta.html">💼 Estado de Cuenta</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+        <div class="card shadow-lg p-4 rounded-4">
+            <h2 class="text-center mb-4">Registro de Clientes</h2>
+
+            <div class="mb-3">
+                <input type="text" id="buscador" class="form-control" placeholder="🔍 Buscar por nombre o DPI...">
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>DPI</th>
+                            <th>Teléfono</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-clientes">
+                        <!-- Datos cargados dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-grid mt-4">
+                <a href="titular.html" class="btn btn-primary btn-lg">➕ Registrar Nuevo Cliente Desde Cero</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+    <script>
+        async function cargarClientes() {
+            try {
+                const response = await fetch('obtener_clientes.php');
+                const clientes = await response.json();
+
+                const tbody = document.getElementById('tabla-clientes');
+                tbody.innerHTML = '';
+
+                clientes.forEach(c => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${c.id}</td>
+                        <td>${c.nombre}</td>
+                        <td>${c.dpi}</td>
+                        <td>${c.telefono}</td>
+                        <td>
+                            <button class="btn btn-sm btn-success me-1" onclick='nuevaVenta(${JSON.stringify(c)})'>➕ Nueva Venta</button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="eliminarCliente(${c.id}, '${c.nombre}')">🗑️ Eliminar</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                // Buscador
+                document.getElementById('buscador').addEventListener('keyup', function () {
+                    const valor = this.value.toLowerCase();
+                    const filas = tbody.querySelectorAll('tr');
+
+                    filas.forEach(fila => {
+                        const texto = fila.innerText.toLowerCase();
+                        fila.style.display = texto.includes(valor) ? '' : 'none';
+                    });
+                });
+
+            } catch (error) {
+                console.error('Error cargando clientes:', error);
+                document.getElementById('tabla-clientes').innerHTML = '<tr><td colspan="5" class="text-center text-danger">Error cargando datos. Asegúrate de abrir desde localhost.</td></tr>';
+            }
+        }
+
+        async function eliminarCliente(id, nombre) {
+            if (confirm(`⚠️ ¿Realmente deseas eliminar al cliente: ${nombre}?\n\nEsta acción NO se puede deshacer.\nSolo se borrará si NO tiene compras activas.`)) {
+                try {
+                    const response = await fetch('eliminar_cliente.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id: id })
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        alert("✅ Cliente eliminado correctamente.");
+                        cargarClientes(); // Recargar tabla
+                    } else {
+                        alert("❌ No se pudo eliminar:\n" + result.message);
+                    }
+                } catch (e) {
+                    console.error(e);
+                    alert("Error de conexión al intentar eliminar.");
+                }
+            }
+        }
+
+        function nuevaVenta(clientData) {
+            if (confirm(`¿Iniciar nueva venta para el cliente: ${clientData.nombre}?`)) {
+                // Guardar ID del cliente existente y datos básicos para resumen
+                const datosTitular = {
+                    id_existente: clientData.id,
+                    nombre: clientData.nombre,
+                    dpi: clientData.dpi,
+                    telefono: clientData.telefono,
+                    direccion: clientData.direccion,
+                    es_cliente_existente: true
+                };
+
+                guardarDatos('titular', datosTitular);
+
+                // Limpiar otros datos para empezar fresco
+                localStorage.removeItem('beneficiario');
+                localStorage.removeItem('inmueble');
+                localStorage.removeItem('compraventa');
+
+                window.location.href = 'beneficiario.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarClientes);
+    </script>
+
+</body>
+
+</html>

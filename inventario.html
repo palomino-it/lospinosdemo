@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inventario de Lotes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <img src="img/RLP_LOGO.png" alt="RLP" class="logo-navbar">
+                <img src="img/ML_LOGO.png" alt="ML" class="logo-navbar">
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html">🏠 Principal</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="inventario.html">📦 Inventario</a></li>
+                    <li class="nav-item"><a class="nav-link" href="clientes.html">👥 Clientes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="estado_cuenta.html">💼 Estado de Cuenta</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 pt-5">
+
+        <!-- Panel Agregar Lote -->
+        <div class="card shadow-lg p-4 rounded-4 mb-4">
+            <h3>➕ Agregar Nuevo Lote</h3>
+            <form id="formAgregarLote" class="row g-3">
+                <div class="col-md-2">
+                    <input type="text" class="form-control" placeholder="Manzana" id="manzana" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" placeholder="Lote" id="lote" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" placeholder="Área (m²)" id="area" required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" step="0.01" class="form-control" placeholder="Valor Vara²" id="valor_vara2"
+                        required>
+                </div>
+                <div class="col-md-2">
+                    <input type="number" step="0.01" class="form-control" placeholder="Precio Total" id="precio_total"
+                        required>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+                <!-- Datos Registro -->
+                <div class="col-md-4">
+                    <input type="text" class="form-control" placeholder="Finca" id="finca" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" placeholder="Folio" id="folio" required>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" placeholder="Libro" id="libro" required>
+                </div>
+            </form>
+        </div>
+
+        <!-- Lista -->
+        <div class="card shadow-lg p-4 rounded-4">
+            <h2 class="text-center mb-4">Inventario de Lotes</h2>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Ubicación</th>
+                            <th>Área</th>
+                            <th>Precio</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-lotes">
+                        <!-- JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        async function cargarInventario() {
+            try {
+                const res = await fetch('obtener_lotes_disponibles.php'); // Podríamos hacer uno que traiga TODOS (incluyendo vendidos)
+                const data = await res.json();
+                const tbody = document.getElementById('tabla-lotes');
+                tbody.innerHTML = '';
+
+                if (data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" class="text-center">No hay lotes registrados.</td></tr>';
+                    return;
+                }
+
+                data.forEach(l => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                    <td>Manzana <strong>${l.manzana}</strong> - Lote <strong>${l.lote}</strong></td>
+                    <td>${l.area}</td>
+                    <td>Q${parseFloat(l.precio_total).toLocaleString()}</td>
+                    <td><span class="badge bg-success">DISPONIBLE</span></td>
+                `;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) { console.error(e); }
+        }
+
+        document.getElementById('formAgregarLote').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const data = {
+                manzana: document.getElementById('manzana').value,
+                lote: document.getElementById('lote').value,
+                area: document.getElementById('area').value,
+                valor_vara2: document.getElementById('valor_vara2').value,
+                precio_total: document.getElementById('precio_total').value,
+                finca: document.getElementById('finca').value,
+                folio: document.getElementById('folio').value,
+                libro: document.getElementById('libro').value
+            };
+
+            try {
+                const res = await fetch('agregar_lote.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await res.json();
+
+                if (result.success) {
+                    alert("✅ Lote agregado correctamente");
+                    document.getElementById('formAgregarLote').reset();
+                    cargarInventario();
+                } else {
+                    alert("❌ Error: " + result.message);
+                }
+            } catch (e) {
+                console.error(e);
+                alert("Error de conexión");
+            }
+        });
+
+        cargarInventario();
+    </script>
+</body>
+
+</html>

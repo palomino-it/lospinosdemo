@@ -22,29 +22,56 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link active" href="index.html">🏠 Menú Principal</a></li>
-          <li class="nav-item"><a class="nav-link" href="titular.html">👤 Titular</a></li>
-          <li class="nav-item"><a class="nav-link" href="beneficiario.html">🤝 Beneficiario</a></li>
-          <li class="nav-item"><a class="nav-link" href="inmueble.html">🏠 Inmueble</a></li>
-          <li class="nav-item"><a class="nav-link" href="compraventa.html">💰 Compraventa</a></li>
-          <li class="nav-item"><a class="nav-link" href="estado_cuenta.html">💼 Estado de Cuenta</a></li>
+          <!-- Navbar libre en el index para mayor limpieza -->
         </ul>
       </div>
     </div>
   </nav>
 
   <div class="container mt-5 pt-5">
-    <div class="card shadow-lg p-5 text-center rounded-4">
-      <div class="mb-4">
-        <img src="img/RLP_LOGO.png" alt="Residenciales Los Pinos" class="img-fluid me-3" style="max-height: 150px;">
-        <img src="img/ML_LOGO.png" alt="ML" class="img-fluid" style="max-height: 150px;">
+
+    <div class="text-center mb-5">
+      <div class="d-inline-flex align-items-center justify-content-center mb-4">
+        <img src="img/RLP_LOGO.png" alt="Residenciales Los Pinos" class="img-fluid me-4" style="max-height: 120px;">
+        <div style="height: 80px; width: 1px; background-color: #ddd;"></div>
+        <img src="img/ML_LOGO.png" alt="ML" class="img-fluid ms-4" style="max-height: 120px;">
       </div>
-      <div class="d-grid gap-3 col-6 mx-auto mt-4">
-        <a href="titular.html" class="btn btn-primary btn-lg">👤 Formulario Titular</a>
-        <a href="beneficiario.html" class="btn btn-primary btn-lg">🤝 Formulario Beneficiario</a>
-        <a href="inmueble.html" class="btn btn-primary btn-lg">🏠 Identificación del Inmueble</a>
-        <a href="compraventa.html" class="btn btn-primary btn-lg">💰 Condiciones de Compraventa</a>
-        <a href="estado_cuenta.html" class="btn btn-primary btn-lg">💼 Estado de Cuenta y Pagos</a>
+      <h1 class="display-6 fw-bold" style="color: #2c3e50;">Panel de Control</h1>
+      <p class="text-muted">Sistema de Gestión de Compraventa</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <!-- Card 1: Inventario -->
+      <div class="col-md-4">
+        <a href="inventario.html" class="dashboard-card">
+          <div class="card-body text-center">
+            <span class="icon-large">📦</span>
+            <h3>Inventario</h3>
+            <p>Gestionar lotes, registrar nuevos inmuebles y verificar disponibilidad.</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Card 2: Clientes -->
+      <div class="col-md-4">
+        <a href="clientes.html" class="dashboard-card">
+          <div class="card-body text-center">
+            <span class="icon-large">👥</span>
+            <h3>Clientes y Ventas</h3>
+            <p>Directorio de clientes, registrar nuevos titulares e iniciar ventas.</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Card 3: Estado de Cuenta -->
+      <div class="col-md-4">
+        <a href="estado_cuenta.html" class="dashboard-card">
+          <div class="card-body text-center">
+            <span class="icon-large">💼</span>
+            <h3>Estado de Cuenta</h3>
+            <p>Consultar saldos, registrar abonos y ver historial de pagos.</p>
+          </div>
+        </a>
       </div>
     </div>
   </div>

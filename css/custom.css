@@ -138,6 +138,14 @@ h6 {
 }
 
 /* Buttons - Minimalista y Premium */
+.btn {
+    border-radius: 50px !important;
+    font-weight: 600;
+    padding: 10px 24px;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
 .btn-primary {
     background-color: var(--btn-primary-bg);
     border-color: var(--btn-primary-bg);
@@ -150,6 +158,22 @@ h6 {
     transition: all 0.3s ease;
     box-shadow: 0 4px 10px rgba(218, 165, 32, 0.2);
     border: none;
+}
+
+.btn-success {
+    background-color: var(--accent-color);
+    /* Gold theme */
+    border-color: var(--accent-color);
+    color: #fff;
+}
+
+.btn-success:hover {
+    background-color: #9e7309;
+    border-color: #9e7309;
+}
+
+.btn-outline-danger {
+    border-width: 2px;
 }
 
 .btn-primary:hover {
@@ -245,13 +269,18 @@ h6 {
 }
 
 /* Print Styles Override - Reporte Ejecutivo Formal (Preservado) */
+#print-area {
+    display: none !important;
+}
+
 @media print {
     @page {
-        margin: 1.5cm;
-        size: letter portrait;
+        margin: 2.5cm;
+        size: auto;
     }
 
     body {
+        padding-top: 1cm !important;
         background-color: white !important;
         color: #000 !important;
         font-family: 'Arial', sans-serif !important;
@@ -405,4 +434,51 @@ h6 {
     .text-muted {
         border: none;
     }
+}
+
+/* Dashboard Styles */
+.dashboard-card {
+    border: none;
+    border-radius: 20px;
+    background: #ffffff;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer;
+    text-decoration: none !important;
+    display: block;
+    height: 100%;
+}
+
+.dashboard-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(184, 134, 11, 0.15);
+    /* Golden shadow */
+}
+
+.dashboard-card .card-body {
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+}
+
+.icon-large {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    display: block;
+}
+
+.dashboard-card h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.dashboard-card p {
+    color: #7f8c8d;
+    font-size: 1rem;
+    margin: 0;
 }

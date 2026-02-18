@@ -22,11 +22,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Menú Principal</a></li>
-          <li class="nav-item"><a class="nav-link active" href="titular.html">👤 Titular</a></li>
-          <li class="nav-item"><a class="nav-link" href="beneficiario.html">🤝 Beneficiario</a></li>
-          <li class="nav-item"><a class="nav-link" href="inmueble.html">🏠 Inmueble</a></li>
-          <li class="nav-item"><a class="nav-link" href="compraventa.html">💰 Compraventa</a></li>
+          <li class="nav-item"><a class="nav-link" href="index.html">🏠 Principal</a></li>
+          <li class="nav-item"><a class="nav-link" href="inventario.html">📦 Inventario</a></li>
+          <li class="nav-item"><a class="nav-link" href="clientes.html">👥 Clientes</a></li>
           <li class="nav-item"><a class="nav-link" href="estado_cuenta.html">💼 Estado de Cuenta</a></li>
         </ul>
       </div>
@@ -35,7 +33,22 @@
 
 
   <div class="container mt-5 pt-5">
-    <div class="card shadow-lg p-4 rounded-4">
+    <div id="clienteExistentePanel" class="card shadow-lg p-4 rounded-4 mb-4 d-none"
+      style="border-left: 5px solid var(--accent-color);">
+      <h2 class="text-center mb-4">✅ Cliente Seleccionado</h2>
+      <div class="alert alert-info">
+        <h4 id="ce-nombre"></h4>
+        <p class="mb-1"><strong>DPI:</strong> <span id="ce-dpi"></span></p>
+        <p class="mb-1"><strong>Teléfono:</strong> <span id="ce-telefono"></span></p>
+        <p class="mb-0"><strong>Dirección:</strong> <span id="ce-direccion"></span></p>
+      </div>
+      <div class="d-grid gap-2">
+        <a href="beneficiario.html" class="btn btn-success btn-lg">➡️ Continuar a Beneficiario</a>
+        <button id="btn-cambiar-cliente" class="btn btn-outline-danger">🔄 Cambiar Cliente / Nuevo Registro</button>
+      </div>
+    </div>
+
+    <div id="formularioPanel" class="card shadow-lg p-4 rounded-4">
       <h2 class="text-center mb-4">Formulario de Registro - Titular</h2>
       <form id="registroForm">
         <!-- Datos personales -->
@@ -101,6 +114,9 @@
         <li class="list-group-item"><strong>Salario:</strong> <span id="r-salario"></span></li>
         <li class="list-group-item"><strong>Otros Ingresos:</strong> <span id="r-otros_ingresos"></span></li>
       </ul>
+      <div class="d-grid mt-4">
+        <a href="beneficiario.html" class="btn btn-success btn-lg">➡️ Ir a Siguiente Paso: Beneficiario</a>
+      </div>
     </div>
   </div>
 
@@ -111,11 +127,33 @@
     const form = document.getElementById("registroForm");
     const datosGuardados = cargarDatos('titular');
     if (datosGuardados) {
-      rellenarFormulario(form, datosGuardados);
-      // Calcular edad si hay fecha
-      if (datosGuardados.fecha_nacimiento) {
-        const evento = new Event('change');
-        document.getElementById("fecha_nacimiento").dispatchEvent(evento);
+      if (datosGuardados.es_cliente_existente) {
+        // Modo Cliente Existente
+        document.getElementById("formularioPanel").style.display = 'none';
+        document.getElementById("clienteExistentePanel").classList.remove('d-none');
+
+        document.getElementById("ce-nombre").textContent = datosGuardados.nombre;
+        document.getElementById("ce-dpi").textContent = datosGuardados.dpi || 'N/A';
+        document.getElementById("ce-telefono").textContent = datosGuardados.telefono || 'N/A';
+        document.getElementById("ce-direccion").textContent = datosGuardados.direccion || 'N/A';
+
+        document.getElementById("btn-cambiar-cliente").addEventListener("click", function () {
+          if (confirm("¿Seguro que desea cambiar de cliente? Se borrarán los datos actuales.")) {
+            localStorage.removeItem('titular');
+            location.reload();
+          }
+        });
+
+      } else {
+        // Modo Normal (Registro Nuevo)
+        rellenarFormulario(form, datosGuardados);
+        // Calcular edad si hay fecha
+        if (datosGuardados.fecha_nacimiento) {
+          const evento = new Event('change');
+          document.getElementById("fecha_nacimiento").dispatchEvent(evento);
+        }
+        // Mostrar botón de siguiente paso
+        document.getElementById("resultado").classList.remove("d-none");
       }
     }
 
