@@ -1,70 +1,91 @@
-/* css/custom.css - Tema Azul Media Noche (Dark Mode) */
+/* css/custom.css - Tema Minimalista Claro */
 
 :root {
-    --primary-color: #191970;
-    /* Midnight Blue */
-    --background-dark: #0f0f3e;
-    /* Darker Midnight Blue for background */
-    --card-bg: #1e1e50;
-    /* Slightly lighter for cards */
-    --text-color: #ffffff;
-    /* White text */
-    --text-muted: #b0b0d0;
+    --primary-color: #ffffff;
+    /* White Navbar */
+    --background-light: #f4f7f6;
+    /* Very light grey/blue for background */
+    --card-bg: #ffffff;
+    /* White for cards */
+    --text-color: #333333;
+    /* Dark grey for text */
+    --text-muted: #6c757d;
     /* Muted text */
-    --accent-color: #DAA520;
-    /* Goldenrod for elegance */
-    --success-color: #28a745;
-    --btn-hover: #202080;
+    --accent-color: #b8860b;
+    /* Dark Goldenrod for contrast */
+    --btn-primary-bg: #DAA520;
+    /* Classic Gold for buttons */
+    --btn-primary-text: #ffffff;
+    /* White text on gold buttons */
+    --input-bg: #f8f9fa;
+    --border-color: #e9ecef;
 }
 
 body {
-    background-color: var(--background-dark);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background-light);
+    font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
     color: var(--text-color);
+    line-height: 1.6;
 }
 
 /* Navbar */
 .navbar-custom {
     background-color: var(--primary-color) !important;
-    border-bottom: 2px solid var(--accent-color);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
 }
 
 .navbar-brand {
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.5px;
     font-size: 1.4rem;
-    color: var(--accent-color) !important;
+    color: var(--text-color) !important;
 }
 
 .nav-link {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: #555 !important;
     font-weight: 500;
-    transition: all 0.3s;
+    margin: 0 5px;
+    padding: 8px 15px !important;
+    border-radius: 50px;
+    transition: all 0.3s ease;
 }
 
 .nav-link:hover,
 .nav-link.active {
     color: var(--accent-color) !important;
+    background-color: rgba(184, 134, 11, 0.08);
+    /* Suave fondo dorado al hover */
 }
 
 /* Cards & Containers */
 .card {
     background-color: var(--card-bg);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    /* Sombra muy suave y moderna */
     color: var(--text-color);
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08);
 }
 
 .list-group-item {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: transparent;
     color: var(--text-color);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-color);
+    font-weight: 500;
 }
 
 .list-group-item-action:hover {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: var(--background-light);
     color: var(--accent-color);
 }
 
@@ -75,117 +96,155 @@ h3,
 h4,
 h5,
 h6 {
-    color: var(--accent-color);
-    font-weight: 600;
+    color: #2c3e50;
+    /* Un gris azulado oscuro para títulos */
+    font-weight: 700;
+    margin-bottom: 1rem;
 }
 
 .text-muted {
     color: var(--text-muted) !important;
 }
 
+.text-accent {
+    color: var(--accent-color);
+}
+
 /* Forms */
 .form-control {
-    background-color: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
     color: var(--text-color);
+    border-radius: 8px;
+    padding: 10px 15px;
 }
 
 .form-control:focus {
-    background-color: rgba(255, 255, 255, 0.15);
+    background-color: #fff;
     border-color: var(--accent-color);
     color: var(--text-color);
-    box-shadow: 0 0 0 0.25rem rgba(218, 165, 32, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(184, 134, 11, 0.15);
+    /* Glow dorado suave */
 }
 
 .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: #adb5bd;
 }
 
-/* Buttons - Estilo Unificado Premium (Dorado) */
+.form-label {
+    font-weight: 600;
+    color: #555;
+    margin-bottom: 0.5rem;
+}
+
+/* Buttons - Minimalista y Premium */
 .btn-primary {
-    background-color: var(--accent-color);
-    border-color: var(--accent-color);
-    color: var(--primary-color);
-    /* Texto azul sobre fondo dorado para contraste */
-    padding: 12px 28px;
-    /* Un poco más grandes */
-    font-weight: 700;
+    background-color: var(--btn-primary-bg);
+    border-color: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+    padding: 10px 24px;
+    font-weight: 600;
     letter-spacing: 0.5px;
-    border-radius: 8px;
+    border-radius: 50px;
+    /* Botones redondeados modernos */
     transition: all 0.3s ease;
-    text-transform: uppercase;
-    font-size: 0.9rem;
+    box-shadow: 0 4px 10px rgba(218, 165, 32, 0.2);
+    border: none;
 }
 
 .btn-primary:hover {
-    background-color: #f0c040;
-    /* Un dorado más brillante al hover */
-    border-color: #f0c040;
-    color: var(--background-dark);
+    background-color: #c5961e;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(218, 165, 32, 0.5);
-    /* Glow dorado */
+    box-shadow: 0 6px 15px rgba(218, 165, 32, 0.3);
+    color: #fff;
 }
 
-/* Reutilizar btn-primary para todo, o definir btn-secondary si hace falta */
 .btn-secondary {
-    background-color: transparent;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    color: var(--text-color);
+    background-color: #e9ecef;
+    border: none;
+    color: #555;
+    border-radius: 50px;
+    padding: 10px 24px;
+    font-weight: 600;
 }
 
 .btn-secondary:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: var(--text-color);
+    background-color: #dee2e6;
+    color: #333;
 }
 
 .btn-outline-dark {
-    /* Used for demo button, updating for dark mode */
-    color: var(--accent-color);
-    border-color: var(--accent-color);
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    border-radius: 50px;
+    padding: 8px 20px;
+    font-weight: 600;
 }
 
 .btn-outline-dark:hover {
-    background-color: var(--accent-color);
-    color: var(--primary-color);
+    background-color: var(--text-color);
+    color: #fff;
+    border-color: var(--text-color);
 }
 
 /* Tables */
 .table {
     color: var(--text-color);
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-color);
 }
 
 .table> :not(caption)>*>* {
     background-color: transparent;
-    /* Let container bg show through */
-    color: var(--text-color);
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: var(--border-color);
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
 }
 
 .table-striped>tbody>tr:nth-of-type(odd)>* {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: var(--text-color);
+    background-color: rgba(0, 0, 0, 0.02);
 }
 
 .table-hover>tbody>tr:hover>* {
-    background-color: rgba(255, 255, 255, 0.1);
-    color: var(--accent-color);
+    background-color: rgba(184, 134, 11, 0.03);
+    /* Muy sutil dorado al hover */
+}
+
+.table th {
+    font-weight: 600;
+    color: #555;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid var(--border-color) !important;
 }
 
 /* Logos */
 .logo-navbar {
-    height: 40px;
-    margin-right: 17px;
+    height: 45px;
+    margin-right: 20px;
+    transition: transform 0.3s ease;
+}
+
+.logo-navbar:hover {
+    transform: scale(1.05);
 }
 
 .logo-main {
-    max-width: 150px;
+    max-width: 160px;
     margin-bottom: 2rem;
 }
 
-/* Print Styles Override - Keep it clean and white for saving ink */
-/* Print Styles Override - Reporte Ejecutivo Formal */
+/* Mejoras de Espaciado y Utilidades */
+.shadow-lg {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .08) !important;
+}
+
+.container {
+    max-width: 1140px;
+    margin: 0 auto;
+}
+
+/* Print Styles Override - Reporte Ejecutivo Formal (Preservado) */
 @media print {
     @page {
         margin: 1.5cm;
@@ -319,7 +378,6 @@ h6 {
     }
 
     /* Forzar texto negro en badges/cards que eran de color */
-    /* Forzar texto negro en badges/cards que eran de color, y clases de texto */
     .bg-primary,
     .bg-success,
     .bg-danger,

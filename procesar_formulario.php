@@ -2,7 +2,7 @@
 // procesar_formulario.php
 header('Content-Type: application/json');
 
-include 'conexion.php'; // Asegúrate de que este archivo tiene la conexión $conn creada con sqlsrv_connect
+include 'conexion.php';
 
 // Leer el JSON recibido
 $json = file_get_contents('php://input');
@@ -13,112 +13,112 @@ if (!$data) {
     exit;
 }
 
-if ($conn === false) {
-    echo json_encode(['success' => false, 'message' => 'Error de conexión a la base de datos.', 'errors' => sqlsrv_errors()]);
+if ($conn->connect_error) {
+    echo json_encode(['success' => false, 'message' => 'Error de conexión a BD.', 'error' => $conn->connect_error]);
     exit;
 }
 
 // Iniciar transacción
-if (sqlsrv_begin_transaction($conn) === false) {
-    echo json_encode(['success' => false, 'message' => 'No se pudo iniciar la transacción.', 'errors' => sqlsrv_errors()]);
-    exit;
-}
+$conn->begin_transaction();
 
 try {
     /* -------------------------------------------------------------
        1. Insertar TITULAR
        ------------------------------------------------------------- */
     $t = $data['titular'];
-    $sqlTitular = "INSERT INTO Titulares (Nombre, Direccion, Telefono, DPI, NIT, FechaNacimiento, Edad, EstadoCivil, Nacionalidad, Profesion, Empresa, DireccionTrabajo, TelefonosTrabajo, Puesto, TiempoTrabajo, Salario, OtrosIngresos) 
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?); 
-                   SELECT SCOPE_IDENTITY() AS id;";
+    $sqlTitular = "INSERT INTO Titulares (nombre, direccion, telefono, dpi, nit, fecha_nacimiento, edad, estado_civil, nacionalidad, profesion, empresa, direccion_trabajo, telefonos_trabajo, puesto, tiempo_trabajo, salario, otros_ingresos) 
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
-    $paramsTitular = [
+    $stmt = $conn->prepare($sqlTitular);
+    $stmt->bind_param("ssssssissssssssdd", 
         $t['nombre'], $t['direccion'], $t['telefono'], $t['dpi'], $t['nit'], $t['fecha_nacimiento'], 
         $t['edad'], $t['estado_civil'], $t['nacionalidad'], $t['profesion'], $t['empresa'], 
         $t['direccion_trabajo'], $t['telefonos_trabajo'], $t['puesto'], $t['tiempo_trabajo'], 
         $t['salario'], $t['otros_ingresos']
-    ];
-
-    $stmtTitular = sqlsrv_query($conn, $sqlTitular, $paramsTitular);
-    if ($stmtTitular === false) throw new Exception("Error insertando Titular: " . print_r(sqlsrv_errors(), true));
+    );
     
-    sqlsrv_next_result($stmtTitular); // Mover al resultado del SELECT
-    $rowTitular = sqlsrv_fetch_array($stmtTitular, SQLSRV_FETCH_ASSOC);
-    $titularId = $rowTitular['id'];
+    if (!$stmt->execute()) throw new Exception("Error Titular: " . $stmt->error);
+    $titularId = $conn->insert_id;
+    $stmt->close();
 
     /* -------------------------------------------------------------
        2. Insertar BENEFICIARIO
        ------------------------------------------------------------- */
-    // Asumiendo que quieres relacionarlo con el Titular, si la tabla Beneficiarios tiene TitularID
     $b = $data['beneficiario'];
-    $sqlBeneficiario = "INSERT INTO Beneficiarios (TitularID, Nombre, Direccion, DPI, Telefonos, Email) 
-                        VALUES (?, ?, ?, ?, ?, ?)";
-    $paramsBeneficiario = [
-        $titularId, $b['b_nombre'], $b['b_direccion'], $b['b_dpi'], $b['b_telefonos'], $b['b_email']
-    ];
-    
-    $stmtBeneficiario = sqlsrv_query($conn, $sqlBeneficiario, $paramsBeneficiario);
-    if ($stmtBeneficiario === false) throw new Exception("Error insertando Beneficiario: " . print_r(sqlsrv_errors(), true));
+    // Validar si existe beneficiario
+    if (!empty($b['b_nombre'])) {
+        $sqlBeneficiario = "INSERT INTO Beneficiarios (titular_id, nombre, direccion, dpi, telefonos, email) 
+                            VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $conn->prepare($sqlBeneficiario);
+        $stmt->bind_param("isssss", $titularId, $b['b_nombre'], $b['b_direccion'], $b['b_dpi'], $b['b_telefonos'], $b['b_email']);
+        if (!$stmt->execute()) throw new Exception("Error Beneficiario: " . $stmt->error);
+        $stmt->close();
+    }
 
     /* -------------------------------------------------------------
        3. Insertar INMUEBLE
        ------------------------------------------------------------- */
     $i = $data['inmueble'];
-    $sqlInmueble = "INSERT INTO Inmuebles (Lotes, Manzana, Area, Finca, Folio, Libro, DeLugar) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?);
-                    SELECT SCOPE_IDENTITY() AS id;";
-    $paramsInmueble = [
-        $i['lotes'], $i['manzana'], $i['area'], $i['finca'], $i['folio'], $i['libro'], $i['de_lugar']
-    ];
-    
-    $stmtInmueble = sqlsrv_query($conn, $sqlInmueble, $paramsInmueble);
-    if ($stmtInmueble === false) throw new Exception("Error insertando Inmueble: " . print_r(sqlsrv_errors(), true));
-    
-    sqlsrv_next_result($stmtInmueble);
-    $rowInmueble = sqlsrv_fetch_array($stmtInmueble, SQLSRV_FETCH_ASSOC);
-    $inmuebleId = $rowInmueble['id'];
+    $sqlInmueble = "INSERT INTO Inmuebles (titular_id, lotes, manzana, area, finca, folio, libro, de_lugar) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sqlInmueble);
+    $stmt->bind_param("isssssss", $titularId, $i['lotes'], $i['manzana'], $i['area'], $i['finca'], $i['folio'], $i['libro'], $i['de_lugar']);
+    if (!$stmt->execute()) throw new Exception("Error Inmueble: " . $stmt->error);
+    $inmuebleId = $conn->insert_id;
+    $stmt->close();
 
     /* -------------------------------------------------------------
        4. Insertar COMPRAVENTA
        ------------------------------------------------------------- */
     $c = $data['compraventa'];
-    $sqlCompraventa = "INSERT INTO Compraventas (TitularID, InmuebleID, PrecioTerreno, GastosUrbanizacion, Total, OtrosDescuentos, PagoInicial, Saldo, SumaPagosFraccionados) 
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-                       SELECT SCOPE_IDENTITY() AS id;";
-    $paramsCompraventa = [
-        $titularId, $inmuebleId, $c['precio_terreno'], $c['gastos_urbanizacion'], $c['total'], 
-        $c['otros_descuentos'], $c['pago'], $c['saldo'], $c['suma_pagos']
-    ];
+    $sqlCompraventa = "INSERT INTO Compraventas (titular_id, inmueble_id, precio_terreno, gastos_urbanizacion, total, otros_descuentos, pago_inicial, saldo, suma_pagos_fraccionados) 
+                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($sqlCompraventa);
     
-    $stmtCompraventa = sqlsrv_query($conn, $sqlCompraventa, $paramsCompraventa);
-    if ($stmtCompraventa === false) throw new Exception("Error insertando Compraventa: " . print_r(sqlsrv_errors(), true));
-    
-    sqlsrv_next_result($stmtCompraventa);
-    $rowCompraventa = sqlsrv_fetch_array($stmtCompraventa, SQLSRV_FETCH_ASSOC);
-    $compraventaId = $rowCompraventa['id'];
+    // Convertir a float/double
+    $precio = (float)$c['precio_terreno'];
+    $gastos = (float)$c['gastos_urbanizacion'];
+    $total = (float)$c['total'];
+    $descuentos = (float)$c['otros_descuentos'];
+    $pago = (float)$c['pago'];
+    $saldo = (float)$c['saldo'];
+    $sumaPagos = (float)$c['suma_pagos'];
+
+    $stmt->bind_param("iiddddddd", 
+        $titularId, $inmuebleId, $precio, $gastos, $total, $descuentos, $pago, $saldo, $sumaPagos
+    );
+
+    if (!$stmt->execute()) throw new Exception("Error Compraventa: " . $stmt->error);
+    $compraventaId = $conn->insert_id;
+    $stmt->close();
 
     /* -------------------------------------------------------------
        5. Insertar PAGOS FRACCIONADOS
        ------------------------------------------------------------- */
     if (isset($c['pagos']) && is_array($c['pagos'])) {
-        foreach ($c['pagos'] as $indice => $pago) {
-            if(!empty($pago['fecha']) && !empty($pago['cantidad'])) {
-                $sqlPagos = "INSERT INTO PagosFraccionados (CompraventaID, NumeroPago, Fecha, Cantidad) VALUES (?, ?, ?, ?)";
-                $paramsPagos = [$compraventaId, $indice+1, $pago['fecha'], $pago['cantidad']];
-                $stmtPagos = sqlsrv_query($conn, $sqlPagos, $paramsPagos);
-                if ($stmtPagos === false) throw new Exception("Error insertando Pago {$indice}: " . print_r(sqlsrv_errors(), true));
+        $sqlPagos = "INSERT INTO PagosFraccionados (compraventa_id, numero_pago, fecha, cantidad) VALUES (?, ?, ?, ?)";
+        $stmt = $conn->prepare($sqlPagos);
+        
+        foreach ($c['pagos'] as $indice => $pagoData) {
+            if(!empty($pagoData['fecha']) && !empty($pagoData['cantidad'])) {
+                $numPago = $indice + 1;
+                $cant = (float)$pagoData['cantidad'];
+                $stmt->bind_param("iisd", $compraventaId, $numPago, $pagoData['fecha'], $cant);
+                if (!$stmt->execute()) throw new Exception("Error Pago {$numPago}: " . $stmt->error);
             }
         }
+        $stmt->close();
     }
 
     // Confirmar transacción
-    sqlsrv_commit($conn);
-    echo json_encode(['success' => true, 'message' => 'Expediente guardado correctamente. ID de Compraventa: ' . $compraventaId]);
+    $conn->commit();
+    echo json_encode(['success' => true, 'message' => 'Expediente guardado exitosamente en MySQL.', 'id' => $titularId]);
 
 } catch (Exception $e) {
     // Revertir cambios si algo falló
-    sqlsrv_rollback($conn);
+    $conn->rollback();
     echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
+
+$conn->close();
 ?>

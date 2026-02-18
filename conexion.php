@@ -1,15 +1,18 @@
 <?php
-$serverName = "DESKTOP-K5GLIJD\SQLEXPRESS"; // o IP del servidor SQL
-$connectionOptions = [
-    "Database" => "RegistroDB",
-    "Uid" => "sa",        // cambia por tu usuario
-    "PWD" => "tu_contraseña" // cambia por tu contraseña
-];
+// conexion.php
+$servername = "localhost";
+$username = "root";  // Usuario por defecto en XAMPP
+$password = "";      // Contraseña por defecto en XAMPP (vacía)
+$dbname = "registro_db";
 
-// Conexión
-$conn = sqlsrv_connect($serverName, $connectionOptions);
+// Crear conexión
+$conn = new mysqli($servername, $username, $password, $dbname);
 
-if ($conn === false) {
-    die(print_r(sqlsrv_errors(), true));
+// Verificar conexión
+if ($conn->connect_error) {
+    die("Error de conexión: " . $conn->connect_error);
 }
+
+// Establecer charset a utf8
+$conn->set_charset("utf8");
 ?>
